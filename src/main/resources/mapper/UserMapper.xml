@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 要设置是实现接口的具体包名加类名, ArticleMapper.xml和ArticleMapper这个interface关联起来，目的是，要实现的接口是谁，
+    就写谁的名字-->
+<mapper namespace="com.example.java_gobang.model.UserMapper">
+
+    <insert id="insert">
+        insert into user values(null, #{username}, #{password}, 1000,0,0)
+    </insert>
+
+    <select id="selectByName" resultType="com.example.java_gobang.model.User">
+        select * from user where username = #{username}
+    </select>
+
+</mapper>

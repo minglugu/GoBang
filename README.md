@@ -1,2 +1,6 @@
-# GoBang
-Gobang project built with Java
+# 工程简介
+
+
+
+# 延伸阅读
+
