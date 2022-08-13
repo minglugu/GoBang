@@ -1,0 +1,38 @@
+/* 公共样式 */
+/* 去掉浏览器默认的样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* add background pic cat.jpg 
+页面拔高
+html 和body都是块据元素，手动指定100%，默认只是包裹里面的元素。
+也就是说，默认值的时候，是卷缩的
+height: 100% 是相对于父元素是100%
+html的父元素是浏览器的窗口，设置为100%，也就是让html和浏览器一样高
+body设置为100%，也就是它的父元素html一样高
+../是以当前文件为基准的上一级目录：common.css所在的路径作为基准，../上一级目录是static，
+然后找到image，再找到cat.jpg
+center： 垂直水平居中*/
+html, body {
+    height: 100%; 
+    background-image: url(../image/cat.jpg);
+    background-repeat: no-repeat;
+    background-position: center; /*垂直水平居中*/
+    background-size: cover; 
+} 
+
+.nav {
+    height: 50px;
+    background-color:rgb(50,50,50);
+    color: white;
+    /*行高：文本高度+行间距，默认的行间距是上下两侧等分的
+    把行高设置成元素高度一样的时候，那么文字就是垂直居中的效果*/
+    line-height: 50px;
+    padding-left: 20px;
+}
+/* 博客系统，导航栏更加复杂，会有logo，会有按钮，等空的时候，实现以下 */
+

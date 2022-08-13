@@ -5,11 +5,11 @@
 <mapper namespace="com.example.java_gobang.model.UserMapper">
 
     <insert id="insert">
-        insert into user values(null, #{username}, #{password}, 1000,0,0)
+        insert into user values(null, #{username}, #{password}, 1000,0,0);
     </insert>
 
     <select id="selectByName" resultType="com.example.java_gobang.model.User">
-        select * from user where username = #{username}
+        select * from user where username = #{username};
     </select>
 
 </mapper>

@@ -1,5 +1,8 @@
 package com.example.java_gobang.model;
 
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface UserMapper {
     // 往数据库里插入一个用户。用于注册功能。
     void insert(User user);
