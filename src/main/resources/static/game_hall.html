@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game_hall</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/game_hall.css">
+</head>
+<body>
+    <div class="nav">Gobang</div>
+    <!-- 整个页面的容器元素 -->
+    <div class="container">
+        <!-- 这个div 在container 中是处于垂直水平居中这样的位置 -->
+        <div>
+            <!-- 展示用户信息 -->
+            <div id="screen"></div>
+            <!-- 按钮匹配，第一次点击，开始匹配，再点一下，文本就改成停止匹配 -->
+            <div id="match-button">开始匹配</div>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script>
+        // 页面加载的时候，发送的请求。
+        $.ajax({
+            type: 'get',
+            url: '/userInfo',
+            success: function(body) {
+                // 获取screen这个标签
+                let screenDiv = document.querySelector('#screen');
+                screenDiv.innerHTML = '玩家：' + body.username + '   分数：' + body.score 
+                    + '<br> 比赛场次：' + body.totalCount + '   获胜场数：' + body.winCount
+            },
+            error: function() {
+                alert("获取用户信息失败！");
+            }
+        });
+    </script>
+</body>
+</html>

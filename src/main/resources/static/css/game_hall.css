@@ -1,0 +1,41 @@
+/* 里面的元素垂直水平居中（display, align-items, justify-content） */
+.container {
+    width: 100%;
+    height: calc(100% - 50px);
+
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+
+#screen {
+    width: 400px;
+    height: 200px;
+    font-size: 20px;
+    background-color: gray;
+    color: white;
+    border-radius: 10px;
+
+    text-align: center;
+    line-height: 100px;
+}
+
+/* height和line-height一样高，就能让一行文字达到垂直居中的效果 */
+#match-button {
+    width: 400px;
+    height: 50px;
+    font-size: 20px;
+    color: white;
+    background-color: orange;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+
+    text-align: center;
+    line-height: 50px;
+    margin-top: 20px;
+}
+
+#match-button:active {
+    background-color: gray;
+}
