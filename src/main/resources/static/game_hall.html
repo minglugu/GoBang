@@ -37,6 +37,30 @@
                 alert("获取用户信息失败！");
             }
         });
+
+        // 此处进行初始化 websocket,并且实现前端的匹配逻辑
+        // 此处的的路径必须写成 /findMatch , Not /findMatch/
+        let websocket = new WebSocket('ws://127.0.0.0:8080/findMatch');
+        websocket.onopen = function() {
+            console.log("onOpen");
+        }
+        websocket.onclose = function() {
+            console.log("onClose");
+        }
+        websocket.onerror = function() {
+            console.log("onError");
+        }
+        
+        // 监听页面关闭事件，在页面关闭之前，手动调用这里的 websocket 的close 方法。
+        // 告诉server，用户退出了。
+        window.onbeforeunload = function() {
+            websocket.close();
+
+        }
+        // 重点实现的方法，要处理服务器返回的响应
+        websocket.onmessage = function() {
+            
+        }
     </script>
 </body>
 </html>
