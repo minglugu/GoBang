@@ -23,6 +23,8 @@ public class MatchAPI extends TextWebSocketHandler {
     @Autowired
     private OnlineUserManager onlineUserManager;
 
+    // 是否是多线程
+    // 如果有多个用户和服务器建立连接/断开连接，此时服务器就是并发得在针对HashMap 进行修改
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // 玩家上线，加入到OnlineUserManager中
@@ -40,8 +42,20 @@ public class MatchAPI extends TextWebSocketHandler {
         //    所以要判定user是否为null
         try {
             User user = (User) session.getAttributes().get("user");
-
-            // 2. 拿到身份信息后，把玩家设置成在线状态了
+            // 2. 先判定当前用户，是否已经登陆过(已经是在线状态)，如果是已经在线，就不继续进行后续逻辑（不许多次登录。。。）。
+            WebSocketSession tmpSession = onlineUserManager.getFromGameHall(user.getUserId());
+            if (tmpSession != null) {
+                // 当前用户已经登录
+                // 针对这个情况，要告知客户端，这里重复登录
+                MatchResponse response = new MatchResponse();
+                response.setOk(false);
+                response.setReason("当前禁止多开");
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
+                // 关掉websocket连接
+                session.close();
+                return;
+            }
+            // 3. 拿到身份信息后，把玩家设置成在线状态了
             onlineUserManager.enterGameHall(user.getUserId(), session);
             System.out.println("玩家 " + user.getUsername() + " 进入游戏大厅!");
         } catch (NullPointerException e) {
@@ -67,8 +81,11 @@ public class MatchAPI extends TextWebSocketHandler {
         try {
             // 玩家下线，从 OnlineUserManager 中删除
             User user = (User) session.getAttributes().get("user");
-            onlineUserManager.exitGameHall(user.getUserId());
-            System.out.println("玩家 " + user.getUsername() + " 离开游戏大厅!");
+            WebSocketSession tmpSession = onlineUserManager.getFromGameHall(user.getUserId());
+            // 如果相等，才执行下线操作。当前的tmpSession，是不是等于session，他俩相等，才执行下线操作。
+            if (tmpSession == session) {
+                onlineUserManager.exitGameHall(user.getUserId());
+            }
         } catch (NullPointerException e) {
             e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
@@ -83,14 +100,20 @@ public class MatchAPI extends TextWebSocketHandler {
         }
     }
 
+    // 当第二个浏览器用同一个userId登录，会让第二个多开的浏览器，下线删除。但会误删第一个浏览器登录的userId
+    // 参数里的session，当前连接的用户的会话。
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         try {
             // 玩家下线，从 OnlineUserManager 中删除
             // 同上线的逻辑
             User user = (User) session.getAttributes().get("user");
-            onlineUserManager.exitGameHall(user.getUserId());
-            System.out.println("玩家 " + user.getUsername() + " 离开游戏大厅!");
+            // tmpSession是之前，存好的session
+            WebSocketSession tmpSession = onlineUserManager.getFromGameHall(user.getUserId());
+            // 如果相等，才执行下线操作。当前的tmpSession，是不是等于session，他俩相等，才执行下线操作。
+            if (tmpSession == session) {
+                onlineUserManager.exitGameHall(user.getUserId());
+            }
         } catch (NullPointerException e) {
             e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
