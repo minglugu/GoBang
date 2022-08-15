@@ -55,12 +55,67 @@
         // 告诉server，用户退出了。
         window.onbeforeunload = function() {
             websocket.close();
-
         }
+
         // 重点实现的方法，要处理服务器返回的响应
         websocket.onmessage = function() {
-            
+            // 处理服务器返回的响应数据，这个响应就是针对 “开始匹配” 或者 “停止匹配” 的
+            // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成JS 对象
+            // JSON 字符串和 JS 对象的转换：
+            // JSON -> JS object: JSON.parse()
+            // JS -> JSON字符串: JSON.stringify()
+            let resp = JSON.parse(e.data);
+            let matchButton = document.querySelector('#match-button');
+            if (!resp.ok) {
+                console.log("游戏大厅中，接收到了失败响应！" + resp.reason);
+                return;
+            }
+            // 结果是true了，有如下三种情况
+            if (resp.message == 'startMatch') {
+                // 开始匹配，请求发送成功
+                console.log("进入匹配队列");
+                // 修改按钮里的文本
+                matchButton.innerHTML = '匹配中...(点击停止)';
+            } else if (resp.message == 'stopMatch') {
+                // 结束匹配，请求发送成功
+                console.log("离开匹配对列成功！");
+                matchButton.innerHTML = '开始匹配';
+            } else if (rep.message == 'matchSuccess') {
+                // 已经匹配到对手了
+                console.log("匹配到对手，进入游戏房间");
+                location.assign("/game_room.html");
+            } else {
+                console.log("收到了非法的响应！message = " + resp.message);
+            }
         }
+
+        // 给匹配按钮添加 点击事件
+        let matchButton = document.querySelector('#match-button');
+        matchButton.onclick = function() {
+            // 点击事件的回调
+            // 触发websocket请求之前，先确认一下，websocket 连接是否好着呢
+            if (websocket.readyState == websocket.OPEN) {
+                // 如果当前 readyState 处在 OPEN 状态，说明连接是好的，可以发送数据
+                // 这里发送的数据有两种可能，开始匹配/停止匹配。此处有两种情况，需要分开处理。
+                if (matchButton.innerHTML == '开始匹配') {
+                    // 发送开始匹配的请求
+                    console.log("开始匹配");
+                    websocket.send(JSON.stringify({                        
+                            message: 'startMatch',
+                    }));
+                } else if (matchButton.innerHTML == '匹配中...(点击停止)') {
+                    // 发送停止匹配的请求
+                    console.log("停止匹配");
+                    websocket.send(JSON.stringify({
+                        message: 'stopMatch',                        
+                    }));
+                }
+            } else {
+                // 这是说明，连接当前是异常的状态
+                alert("当前连接已经断开！请重新登录。");
+                location.assign('/login.html');
+            }
+        } 
     </script>
 </body>
 </html>
