@@ -72,8 +72,35 @@ public class MatchAPI extends TextWebSocketHandler {
         }
     }
 
+    // 实现处理开始匹配请求和处理停止匹配请求
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        User user = (User)session.getAttributes().get("user");
+        // 获取到客户端给服务器发送的数据，是由textMessage来表示的数据
+        // getPayload()得到websocket数据包里面的数据载荷（是JSON格式的字符串），再解析成我们希望的对象。
+        String payload = message.getPayload();
+        // 当前数据载荷是一个 JSON 格式的字符串，需要把他转成 Java 的MatchRequest对象。是从客户端读来的数据
+        MatchRequest request = objectMapper.readValue(payload, MatchRequest.class);
+        // 这是个客户端返回的数据
+        MatchResponse response = new MatchResponse();
+        // stopMatch和startMatch是在约定前后端接口的时候，已经设计好的情况
+        if (request.getMessage().equals("startMatch")) {
+            // 进入匹配队列
+            // TODO 先创建一个类，表示匹配对列，把当前用户给加进去
+            // 把玩家信息放入匹配队列后，就可以返回一个响应给客户端了，告诉客户端，已经放入队列成功。
+            response.setOk(true);
+            response.setMessage("startMatch");
+        } else if (request.getMessage().equals("stopMatch")) {
+            // 退出匹配队列
+            // TODO 先创建一个类，表示匹配对列，把当前用户从队列中移除
+            // 移除之后，就可以返回一个响应给客户端了
+            response.setOk(true);
+            response.setMessage("stopMatch");
+        } else {
+            // 非法情况
+            response.setOk(false);
+            response.setReason("非法的匹配请求");
+        }
     }
 
     @Override
