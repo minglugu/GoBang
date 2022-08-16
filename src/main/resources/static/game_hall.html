@@ -40,7 +40,7 @@
 
         // 此处进行初始化 websocket,并且实现前端的匹配逻辑
         // 此处的的路径必须写成 /findMatch , Not /findMatch/
-        let websocket = new WebSocket('ws://127.0.0.0:8080/findMatch');
+        let websocket = new WebSocket('ws://127.0.0.1:8080/findMatch');
         websocket.onopen = function() {
             console.log("onOpen");
         }
@@ -58,7 +58,7 @@
         }
 
         // 重点实现的方法，要处理服务器返回的响应
-        websocket.onmessage = function() {
+        websocket.onmessage = function(e) {
             // 处理服务器返回的响应数据，这个响应就是针对 “开始匹配” 或者 “停止匹配” 的
             // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成JS 对象
             // JSON 字符串和 JS 对象的转换：

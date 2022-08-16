@@ -14,7 +14,7 @@ import java.util.Queue;
 @Component
 // 这个类表示"匹配器"，通过这个类，负责完成整个匹配
 public class Matcher {
-    // 创建3个匹配队列d, 可以更加细分化
+    // 创建3个匹配队列,。可以更加细分化成多个队列
     private Queue<User> normalQueue = new LinkedList<>();
     private Queue<User> highQueue = new LinkedList<>();
     private Queue<User> veryHighQueue = new LinkedList<>();
@@ -22,7 +22,11 @@ public class Matcher {
     @Autowired
     private OnlineUserManager onlineUserManager;
 
+    @Autowired
+    private RoomManager roomManager;
+
     private ObjectMapper objectMapper;
+
     // 操作匹配队列的方法
     // add a user to the corresponding queue
     // 三个队列是分开处理各自的线程的，彼此之间是互不干扰的
@@ -149,8 +153,10 @@ public class Matcher {
                     return;
                 }
 
-                // 4. TODO 把这两个玩家放到一个游戏房间里
-                // 一会儿在这里实现
+                // 4. 把这两个玩家和房间放到一个游戏房间里
+                // 创建房间
+                Room room = new Room();
+                roomManager.add(room, player1.getUserId(), player2.getUserId());
 
                 // 5. 给玩家反馈信息：你匹配到对手了
                 //    通过 websocket 返回一个 message 为 ‘matchSuccess’ 这样的响应
@@ -172,7 +178,6 @@ public class Matcher {
             } catch (IOException | InterruptedException e) { // 两个异常合并成一个
                 e.printStackTrace();
             }
-
         }
     }
 }
