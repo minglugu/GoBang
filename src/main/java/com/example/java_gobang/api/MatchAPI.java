@@ -2,6 +2,7 @@ package com.example.java_gobang.api;
 
 import com.example.java_gobang.game.MatchRequest;
 import com.example.java_gobang.game.MatchResponse;
+import com.example.java_gobang.game.Matcher;
 import com.example.java_gobang.game.OnlineUserManager;
 import com.example.java_gobang.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,10 @@ public class MatchAPI extends TextWebSocketHandler {
     // 建好OnlineUserManager以后，就可以在MatchAPI里面，使用到OnlineUserManager里面的对象
     @Autowired
     private OnlineUserManager onlineUserManager;
+
+    // matcher来决定增加还是删除用户。
+    @Autowired
+    private Matcher matcher;
 
     // 是否是多线程
     // 如果有多个用户和服务器建立连接/断开连接，此时服务器就是并发得在针对HashMap 进行修改
@@ -86,13 +91,15 @@ public class MatchAPI extends TextWebSocketHandler {
         // stopMatch和startMatch是在约定前后端接口的时候，已经设计好的情况
         if (request.getMessage().equals("startMatch")) {
             // 进入匹配队列
-            // TODO 先创建一个类，表示匹配对列，把当前用户给加进去
+            // 先创建一个类，表示匹配对列，把当前用户给加进去
+            matcher.add(user);
             // 把玩家信息放入匹配队列后，就可以返回一个响应给客户端了，告诉客户端，已经放入队列成功。
             response.setOk(true);
             response.setMessage("startMatch");
         } else if (request.getMessage().equals("stopMatch")) {
             // 退出匹配队列
-            // TODO 先创建一个类，表示匹配对列，把当前用户从队列中移除
+            // 先创建一个类，表示匹配对列，把当前用户从队列中移除
+            matcher.remove(user);
             // 移除之后，就可以返回一个响应给客户端了
             response.setOk(true);
             response.setMessage("stopMatch");
@@ -113,6 +120,8 @@ public class MatchAPI extends TextWebSocketHandler {
             if (tmpSession == session) {
                 onlineUserManager.exitGameHall(user.getUserId());
             }
+            // 如果玩家正在匹配中，而websocket连接断开了，就应该移除匹配队列
+            matcher.remove(user);
         } catch (NullPointerException e) {
             e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
@@ -141,6 +150,8 @@ public class MatchAPI extends TextWebSocketHandler {
             if (tmpSession == session) {
                 onlineUserManager.exitGameHall(user.getUserId());
             }
+            // 如果玩家正在匹配中，而websocket连接断开了，就应该移除匹配队列
+            matcher.remove(user);
         } catch (NullPointerException e) {
             e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
@@ -153,6 +164,7 @@ public class MatchAPI extends TextWebSocketHandler {
             // TextMessage 就表示一个 文本格式的 websocket 数据包
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
         }
-
     }
+
+
 }
