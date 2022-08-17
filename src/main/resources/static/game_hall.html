@@ -46,6 +46,9 @@
         }
         websocket.onclose = function() {
             console.log("onClose");
+            // 当断开连接时（比如说多开或者是客户自己断开连接的情况下），给客户一个提示信息。
+            alert("当前和服务器的连接已经断开，请重新登录！");
+            location.assign("/login.html");
         }
         websocket.onerror = function() {
             console.log("onError");
@@ -80,7 +83,7 @@
                 // 结束匹配，请求发送成功
                 console.log("离开匹配对列成功！");
                 matchButton.innerHTML = '开始匹配';
-            } else if (rep.message == 'matchSuccess') {
+            } else if (resp.message == 'matchSuccess') {
                 // 已经匹配到对手了
                 console.log("匹配到对手，进入游戏房间");
                 location.assign("/game_room.html");

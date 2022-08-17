@@ -1,13 +1,3 @@
-/* 里面的元素垂直水平居中（display, align-items, justify-content） */
-.container {
-    width: 100%;
-    height: calc(100% - 50px);
-
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-}
-
 #screen {
     width: 400px;
     height: 200px;

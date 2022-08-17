@@ -7,6 +7,8 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+
+
 /* add background pic cat.jpg 
 页面拔高
 html 和body都是块据元素，手动指定100%，默认只是包裹里面的元素。
@@ -36,3 +38,12 @@ html, body {
 }
 /* 博客系统，导航栏更加复杂，会有logo，会有按钮，等空的时候，实现以下 */
 
+/* 里面的元素垂直水平居中（display, align-items, justify-content） */
+.container {
+    width: 100%;
+    height: calc(100% - 50px);
+
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}

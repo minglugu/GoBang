@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Room</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/game_room.css">
+</head>
+<body>
+    <div class="nav">联机五子棋</div>
+    <!-- 除了导航栏以外的整个部分 -->
+    <div class="container">
+        <div>
+            <!-- 棋盘区域，需要基于 canvas 进行实现. canvas是HTML5 新标签，可以在画布上画画
+                此处棋盘和棋子都是画上去的。canvas标签，有js的canvas api，实现画画的效果-->
+            <canvas id="chess" width="450px" height="450px">
+
+            </canvas>
+            <!-- 显示区域，初始值为“等待玩家连接中” -->
+            <div id="screen"> 等待玩家连接中... </div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>

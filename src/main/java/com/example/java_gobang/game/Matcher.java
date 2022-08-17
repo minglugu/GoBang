@@ -25,7 +25,8 @@ public class Matcher {
     @Autowired
     private RoomManager roomManager;
 
-    private ObjectMapper objectMapper;
+    // 不实例化，会造成空指针异常。
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     // 操作匹配队列的方法
     // add a user to the corresponding queue
