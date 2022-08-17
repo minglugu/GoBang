@@ -1,5 +1,6 @@
 package com.example.java_gobang.config;
 
+import com.example.java_gobang.api.GameAPI;
 import com.example.java_gobang.api.MatchAPI;
 import com.example.java_gobang.api.TestAPI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Autowired
     private TestAPI testAPI;
 
+    // 匹配机制，涉及的类
     @Autowired
     private MatchAPI matchAPI;
+
+    // 对战模块，涉及的类
+    @Autowired
+    private GameAPI gameAPI;
 
     @Override
     // 注册handler到框架里面，告知当前websocket，和哪个路径相匹配，这个testAPI和/test这个路径匹配
@@ -27,6 +33,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
         // （放到Websocket的session中）。用户登录就会给HttpSession中，保存用户的信息.
         // 用户的Httpsession和Websocket的session是不一样的。
         webSocketHandlerRegistry.addHandler(matchAPI, "/findMatch")
+                .addInterceptors(new HttpSessionHandshakeInterceptor());
+
+        // /game路径和这个gameAPI类 关联起来了，再通过add来获取session
+        webSocketHandlerRegistry.addHandler(gameAPI, "/game")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }
 }
