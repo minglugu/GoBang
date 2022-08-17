@@ -48,8 +48,8 @@ public class MatchAPI extends TextWebSocketHandler {
         try {
             User user = (User) session.getAttributes().get("user");
             // 2. 先判定当前用户，是否已经登陆过(已经是在线状态)，如果是已经在线，就不继续进行后续逻辑（不许多次登录。。。）。
-            WebSocketSession tmpSession = onlineUserManager.getFromGameHall(user.getUserId());
-            if (tmpSession != null) {
+            if (onlineUserManager.getFromGameRoom(user.getUserId()) != null
+                    || onlineUserManager.getFromGameHall(user.getUserId()) != null) {
                 // 当前用户已经登录
                 // 针对这个情况，要告知客户端，这里重复登录
                 MatchResponse response = new MatchResponse();
