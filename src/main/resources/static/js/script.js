@@ -1,6 +1,8 @@
+// websocket的初始化过程，需要了解
+
 // 客户端发给服务器请求，然后服务器会给客户端返回的响应。
 // 用全局变量来记录，并初始化信息
-gameInfo = {
+let gameInfo = {
     roomId: null,
     thisUserId: null,
     thatUserId: null,
@@ -24,53 +26,63 @@ function setScreenText(me) {
 // 初始化 websocket
 //////////////////////////////////////////////////
 
+
 // 此处写的路径要写作 /game, 不要写作 /game/
-// let websocketUrl = "ws://" + location.host + "/game";
-// let websocket = new WebSocket(websocketUrl);
+// 和服务器进行连接
+ let websocketUrl = "ws://172.0.0.1:8080/game";
+ let websocket = new WebSocket(websocketUrl);
 
-// websocket.onopen = function() {
-//     console.log("连接游戏房间成功!");
-// }
+// 处理回调方法
+// 连接建立之后，需要建立的回调函数
+websocket.onopen = function() {
+    console.log("连接游戏房间成功!");
+}
 
-// websocket.close = function() {
-//     console.log("和游戏服务器断开连接!");
-// }
+websocket.close = function() {
+    console.log("和游戏服务器断开连接!");
+}
 
-// websocket.onerror = function() {
-//     console.log("和服务器的连接出现异常!");
-// }
+websocket.onerror = function() {
+    console.log("和服务器的连接出现异常!");
+}
 
-// window.onbeforeunload = function() {
-//     websocket.close();
-// }
+// 页面关闭之前，主动调用websocket.close, 进行连接断开操作
+window.onbeforeunload = function() {
+    websocket.close();
+}
 
-// // 处理服务器返回的响应数据
-// websocket.onmessage = function(event) {
-//     console.log("[handlerGameReady] " + event.data);
-//     let resp = JSON.parse(event.data);
+// 处理服务器返回的响应数据，比较关键的步骤。 #51 视频
+websocket.onmessage = function(event) {
+    console.log("[handlerGameReady] " + event.data);
+    // 转换成对象
+    let resp = JSON.parse(event.data);
 
-//     if (!resp.ok) {
-//         alert("连接游戏失败! reason: " + resp.reason);
-//         // 如果出现连接失败的情况, 回到游戏大厅
-//         location.assign("/game_hall.html");
-//         return;
-//     }
+    if (!resp.ok) {
+        alert("连接游戏失败! reason: " + resp.reason);
+        // 如果出现连接失败的情况, 回到游戏大厅
+        location.assign("/game_hall.html");
+        return;
+    }
 
-//     if (resp.message == 'gameReady') {
-//         gameInfo.roomId = resp.roomId;
-//         gameInfo.thisUserId = resp.thisUserId;
-//         gameInfo.thatUserId = resp.thatUserId;
-//         gameInfo.isWhite = (resp.whiteUser == resp.thisUserId);
+    if (resp.message != 'gameReady') {
+        console.log("响应类型错误");
+        return;
+    }
 
-//         // 初始化棋盘
-//         initGame();
-//         // 设置显示区域的内容
-//         setScreenText(gameInfo.isWhite);
+    gameInfo.roomId = resp.roomId;
+    gameInfo.thisUserId = resp.thisUserId;
+    gameInfo.thatUserId = resp.thatUserId;
+    gameInfo.isWhite = (resp.whiteUser == resp.thisUserId);
+
+    // 初始化棋盘放到响应里面，响应成功，就会初始化棋盘
+    initGame();
+    // 设置显示区域的内容
+    setScreenText(gameInfo.isWhite);
 //     } else if (resp.message == 'repeatConnection') {
 //         alert("检测到游戏多开! 请使用其他账号登录!");
 //         location.assign("/login.html");
 //     }
-// }
+}
 
 //////////////////////////////////////////////////
 // 初始化一局游戏
@@ -234,5 +246,3 @@ function initGame() {
     //     }
     // }
 }
-
-initGame();
