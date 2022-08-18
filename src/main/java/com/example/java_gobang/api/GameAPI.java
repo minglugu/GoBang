@@ -76,6 +76,18 @@ public class GameAPI extends TextWebSocketHandler {
     // 收到请求之后的处理
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        // 1. 先从 session 里，拿到当前用户的身份信息
+        User user = (User)session.getAttributes().get("user");
+        if (user == null) {
+            System.out.println("[handleTextMessage] 当前玩家尚未登录！");
+            return;
+        }
+
+        // 2. 根据玩家id，获取到房间对象，通过roomManager
+        Room room = roomManager.getRoomByUserId(user.getUserId());
+
+        // 3. 通过room对象，处理这次具体的请求
+        room.putChess(message.getPayload());
     }
 
     // 连接异常的处理

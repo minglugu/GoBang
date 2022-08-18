@@ -151,6 +151,7 @@ function initGame() {
 
     // 针对chess（棋盘canvas），设定了点击回调。
     // e是点击回调中的事件参数，这里就会记录点击的实际位置（坐标）
+    // 依据画布，进行下棋的操作
     chess.onclick = function (e) {
         if (over) {
             return;
@@ -166,74 +167,93 @@ function initGame() {
         let col = Math.floor(x / 30);
         let row = Math.floor(y / 30);
         if (chessBoard[row][col] == 0) {
-            // 发送坐标给服务器, 服务器要返回结果
-            //send(row, col);
+            // 点击棋盘的时候，发送坐标给服务器, 服务器要返回结果
+            /* “落子”的请求，发给服务器
+               {
+                message: 'putChess',
+                userId: 1，
+                row: 0,
+                col: 0,
+               }
+               服务器返回“落子”的响应，给每一个玩家(客户端)，再进行棋盘绘制
+                {
+                message: 'putChess',
+                userId: 1，
+                row: 0,
+                col: 0,
+                winner: 0,
+               }
+               */
+            // 发送请求给服务器，send();
+            send(row, col);
 
             // 留到浏览器收到落子响应的时候再处理(收到响应再来画棋子)
             // 走一步（里面会 绘制一个棋子）
-            oneStep(col, row, gameInfo.isWhite);
-            // 设置为1，表示已经落子
-            chessBoard[row][col] = 1;
+            // oneStep(col, row, gameInfo.isWhite);
+            // // 设置为1，表示已经落子
+            // chessBoard[row][col] = 1;
         }
     }
 
-    // function send(row, col) {
-    //     let req = {
-    //         message: 'putChess',
-    //         userId: gameInfo.thisUserId,
-    //         row: row,
-    //         col: col
-    //     };
-
-    //     websocket.send(JSON.stringify(req));
-    // }
+    // 根据约定的请求格式，然后在服务器端，可以处理请求了。
+    function send(row, col) {
+        let req = {
+            message: 'putChess',
+            userId: gameInfo.thisUserId,
+            row: row,
+            col: col
+        };
+        // 发送操作，js对象转换成JSON格式的字符串以后，再进行发送
+        websocket.send(JSON.stringify(req));
+    }
 
     // 之前 websocket.onmessage 主要是用来处理了游戏就绪响应. 在游戏就绪之后, 初始化完毕之后, 也就不再有这个游戏就绪响应了. 
     // 就在这个 initGame 内部, 修改 websocket.onmessage 方法~~, 让这个方法里面针对落子响应进行处理!
-    // websocket.onmessage = function(event) {
-    //     console.log("[handlerPutChess] " + event.data);
+    websocket.onmessage = function(event) {
+        console.log("[handlerPutChess] " + event.data);
 
-    //     let resp = JSON.parse(event.data);
-    //     if (resp.message != 'putChess') {
-    //         console.log("响应类型错误!");
-    //         return;
-    //     }
+        let resp = JSON.parse(event.data);
+        if (resp.message != 'putChess') {
+            console.log("响应类型错误!");
+            return;
+        }
 
-    //     // 先判定当前这个响应是自己落的子, 还是对方落的子.
-    //     if (resp.userId == gameInfo.thisUserId) {
-    //         // 我自己落的子
-    //         // 根据我自己子的颜色, 来绘制一个棋子
-    //         oneStep(resp.col, resp.row, gameInfo.isWhite);
-    //     } else if (resp.userId == gameInfo.thatUserId) {
-    //         // 我的对手落的子
-    //         oneStep(resp.col, resp.row, !gameInfo.isWhite);
-    //     } else {
-    //         // 响应错误! userId 是有问题的!
-    //         console.log('[handlerPutChess] resp userId 错误!');
-    //         return;
-    //     }
+        // 先判定当前这个响应是自己落的子, 还是对方落的子.
+        if (resp.userId == gameInfo.thisUserId) {
+            // 我自己落的子
+            // 根据我自己子的颜色, 来绘制一个棋子
+            oneStep(resp.col, resp.row, gameInfo.isWhite);
+        } else if (resp.userId == gameInfo.thatUserId) {
+            // 我的对手落的子
+            oneStep(resp.col, resp.row, !gameInfo.isWhite);
+        } else {
+            // 响应错误! userId 是有问题的!
+            console.log('[handlerPutChess] resp userId 错误!');
+            return;
+        }
 
-    //     // 给对应的位置设为 1, 方便后续逻辑判定当前位置是否已经有子了. 
-    //     chessBoard[resp.row][resp.col] = 1;
+        // 给对应的位置设为 1, 方便后续逻辑判定当前位置是否已经有子了. 因为1，表示已经落子
+        chessBoard[resp.row][resp.col] = 1;
 
-    //     // 交换双方的落子轮次
-    //     me = !me;
-    //     setScreenText(me);
+        // 交换双方的落子轮次，初始化的时候，创建了me这个变量，是我下，还是对方下。
+        // 当前me是true，改成false：因为此轮me下完棋了，就改成false，轮到对方下棋。
+        me = !me;
+        setScreenText(me);
 
-    //     // 判定游戏是否结束
+        // 判定游戏是否结束, 如果胜负已分，那么给出提示
     //     let screenDiv = document.querySelector('#screen');
-    //     if (resp.winner != 0) {
-    //         if (resp.winner == gameInfo.thisUserId) {
-    //             // alert('你赢了!');
-    //             screenDiv.innerHTML = '你赢了!';
-    //         } else if (resp.winner = gameInfo.thatUserId) {
-    //             // alert('你输了!');
+        if (resp.winner != 0) {
+            if (resp.winner == gameInfo.thisUserId) {
+                alert('你赢了!');
+    //            screenDiv.innerHTML = '你赢了!';
+            } else if (resp.winner = gameInfo.thatUserId) {
+                alert('你输了!');
     //             screenDiv.innerHTML = '你输了!';
-    //         } else {
-    //             alert("winner 字段错误! " + resp.winner);
-    //         }
-    //         // 回到游戏大厅
-    //         // location.assign('/game_hall.html');
+            } else {
+                alert("winner 字段错误! " + resp.winner);
+            }
+            // 胜负已分，回到游戏大厅
+            location.assign('/game_hall.html');
 
     //         // 增加一个按钮, 让玩家点击之后, 再回到游戏大厅~
     //         let backBtn = document.createElement('button');
