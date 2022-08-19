@@ -53,7 +53,7 @@ public class MatchAPI extends TextWebSocketHandler {
                 // 当前用户已经登录
                 // 针对这个情况，要告知客户端，这里重复登录
                 MatchResponse response = new MatchResponse();
-                response.setOk(false);
+                response.setOk(true);
                 response.setReason("当前禁止多开");
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
                 // 关掉websocket连接
@@ -64,7 +64,8 @@ public class MatchAPI extends TextWebSocketHandler {
             onlineUserManager.enterGameHall(user.getUserId(), session);
             System.out.println("玩家 " + user.getUsername() + " 进入游戏大厅!");
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            System.out.println("[MatchAPI.afterConnectionEstablished] 当前用户未登录！");
+            // e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
             // 把当前用户尚未登录这个信息，给返回 回去。按照约定的前后端接口。要另外在game package里面，单独建立websocket请求和响应的类/
             MatchResponse response = new MatchResponse();
@@ -110,7 +111,7 @@ public class MatchAPI extends TextWebSocketHandler {
         }
         // 服务器这边在处理 匹配请求的时候，是要立即返回一个 websocket 响应的
         // 虽然在服务器代码这里构造了响应对象，但是忘记sendMessage，给发回去了
-        // 一开始写代码的时候，没有这两行，所以console.log里面没有返回的数据信息1
+        // 一开始写代码的时候，没有这两行，所以console.log里面没有返回的数据信息
         String jsonString = objectMapper.writeValueAsString(response);
         session.sendMessage(new TextMessage(jsonString));
     }
@@ -128,16 +129,18 @@ public class MatchAPI extends TextWebSocketHandler {
             // 如果玩家正在匹配中，而websocket连接断开了，就应该移除匹配队列
             matcher.remove(user);
         } catch (NullPointerException e) {
-            e.printStackTrace();
-            // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
-            // 把当前用户尚未登录这个信息，给返回 回去。按照约定的前后端接口。要另外在game package里面，单独建立websocket请求和响应的类/
-            MatchResponse response = new MatchResponse();
-            response.setOk(false);
-            response.setMessage("尚未登录！不能进行后续的匹配功能！");
-            // 把response构造成JSON格式的字符串. sendMessage(WebSocket 对象)
-            // 先通过ObjectMapper 把 MatchResponse 对象转成JSON 字符串，然后再包装上一层TextMessage, 再进行传输。
-            // TextMessage 就表示一个 文本格式的 websocket 数据包
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
+            System.out.println("[MatchAPI.handleTransportError] 当前用户未登录！");
+//            e.printStackTrace();
+//            // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
+//            // 把当前用户尚未登录这个信息，给返回 回去。按照约定的前后端接口。要另外在game package里面，单独建立websocket请求和响应的类/
+            // 不应该在连接关闭之后，还尝试发送消息给客户端
+//            MatchResponse response = new MatchResponse();
+//            response.setOk(false);
+//            response.setMessage("尚未登录！不能进行后续的匹配功能！");
+//            // 把response构造成JSON格式的字符串. sendMessage(WebSocket 对象)
+//            // 先通过ObjectMapper 把 MatchResponse 对象转成JSON 字符串，然后再包装上一层TextMessage, 再进行传输。
+//            // TextMessage 就表示一个 文本格式的 websocket 数据包
+//            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
         }
     }
 
@@ -158,18 +161,19 @@ public class MatchAPI extends TextWebSocketHandler {
             // 如果玩家正在匹配中，而websocket连接断开了，就应该移除匹配队列
             matcher.remove(user);
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            System.out.println("[MatchAPI.afterConnectionClosed] 当前用户未登录！");
+
+            // e.printStackTrace();
             // 出现空指针异常，说明当前用户的身份信息是空，用户未登录
             // 把当前用户尚未登录这个信息，给返回 回去。按照约定的前后端接口。要另外在game package里面，单独建立websocket请求和响应的类/
-            MatchResponse response = new MatchResponse();
-            response.setOk(false);
-            response.setMessage("尚未登录！不能进行后续的匹配功能！");
-            // 把response构造成JSON格式的字符串. sendMessage(WebSocket 对象)
-            // 先通过ObjectMapper 把 MatchResponse 对象转成JSON 字符串，然后再包装上一层TextMessage, 再进行传输。
-            // TextMessage 就表示一个 文本格式的 websocket 数据包
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
+            // 不应该在连接关闭之后，还尝试发送消息给客户端
+//            MatchResponse response = new MatchResponse();
+//            response.setOk(false);
+//            response.setMessage("尚未登录！不能进行后续的匹配功能！");
+//            // 把response构造成JSON格式的字符串. sendMessage(WebSocket 对象)
+//            // 先通过ObjectMapper 把 MatchResponse 对象转成JSON 字符串，然后再包装上一层TextMessage, 再进行传输。
+//            // TextMessage 就表示一个 文本格式的 websocket 数据包
+//            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
         }
     }
-
-
 }

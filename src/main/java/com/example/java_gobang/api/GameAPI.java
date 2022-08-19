@@ -63,7 +63,7 @@ public class GameAPI extends TextWebSocketHandler {
         if (onlineUserManager.getFromGameHall(user.getUserId()) != null
                 || onlineUserManager.getFromGameRoom(user.getUserId()) != null) {
             // 如果一个账号，在游戏大厅，也在游戏房间，也算是多开
-            resp.setOk(false);
+            resp.setOk(true);
             resp.setReason("禁止多开游戏界面");
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
             return;

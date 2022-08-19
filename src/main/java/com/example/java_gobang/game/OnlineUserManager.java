@@ -47,5 +47,4 @@ public class OnlineUserManager {
     public WebSocketSession getFromGameRoom(int userId) {
         return gameRoom.get(userId);
     }
-
 }
