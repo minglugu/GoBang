@@ -20,12 +20,21 @@ public class Room {
     private User user1;
     private User user2;
 
+    public int getWhiteUser() {
+        return whiteUser;
+    }
+
+    public void setWhiteUser(int whiteUser) {
+        this.whiteUser = whiteUser;
+    }
+
+    // 先手方的玩家 id
+    private int whiteUser;
+
     // 使用常量方式，替代hardcode
     private static final int MAX_ROW = 15;
     private static final int MAX_COL = 15;
 
-    // 先落子的玩家 id
-    private int whiteUser;
 
     // 2D array 表示棋盘
     // 约定：
