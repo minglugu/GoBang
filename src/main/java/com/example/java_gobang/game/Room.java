@@ -79,7 +79,7 @@ public class Room {
         printBoard();
 
         // 3. 进行胜负判定
-        int winner = checkWinner(row, col);
+        int winner = checkWinner(row, col, chess);
 
         // 4. 给客户端返回响应对象，构造响应数据，返回给客户端.
         //    给房间里的所有用户端，都返回这个响应
@@ -142,10 +142,81 @@ public class Room {
     // 每个玩家落子后，使用这个方法，来判定，当前落子是否分出胜负
     // 约定：如果玩家1 获胜，返回玩家1 的userId，如果玩家2 获胜，返回玩家2 的userId.
     // 如果胜负未分，那么返回0
-    private int checkWinner(int row, int col) {
-        // TODO checkWinner(row, col)
+    private int checkWinner(int row, int col, int chess) {
+        //
         // 判定棋面上，是否出现5子 连珠。一行，一列，或对角线
         // 只判定落子周围的5子连珠的情况。
+        // 1. 检查所有的行
+        //    先遍历这5种情况
+        for (int c = col - 4; c <= col ; c++) {
+            // 针对其中一种情况, 来判定这五个子 是不是连在一起了，
+            // 并且还跟玩家落子（1 或者 2）是一样的，才算获胜
+            try{
+                if (board[row][c] == chess
+                    && board[row][c+1] == chess
+                    && board[row][c+2] == chess
+                    && board[row][c+3] == chess
+                    && board[row][c+4] == chess) {
+                    // 构成了5子连珠，胜负已经分。
+                    return chess == 1? user1.getUserId() : user2.getUserId();
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // 如果出现数组下标越界，就在这里直接忽略这个异常。
+                continue;
+            }
+        }
+
+        // 2. 检查所有的列
+        //    先遍历5种情况
+        for (int r = row - 4; r <= row; r++) {
+            // 数组越界异常
+            try{
+                if (board[r][col] == chess &&
+                    board[r+1][col] == chess &&
+                    board[r+2][col] == chess &&
+                    board[r+3][col] == chess &&
+                    board[r+4][col] == chess) {
+                    // 构成了5子连珠，胜负已经分。
+                    return chess == 1 ? user1.getUserId() : user2.getUserId();
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                continue;
+            }
+        }
+
+        // 3. 左对角线
+        for (int r = row-4, c = col-4; r <=row && c <=col; r++, c++) {
+            // 数组越界异常
+            try{
+                if (board[r][c] == chess
+                    && board[r+1][c+1] == chess
+                    && board[r+2][c+2] == chess
+                    && board[r+3][c+3] == chess
+                    && board[r+4][c+4] == chess) {
+                    // 构成了5子连珠，胜负已经分。
+                    return chess == 1 ? user1.getUserId() : user2.getUserId();
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                continue;
+            }
+        }
+
+        // 4. 右对角线
+        for (int r = row - 4, c = col + 4; r <= row && c >= col; r++, c--) {
+            // 数组越界异常
+            try{
+                if (board[r][c] == chess
+                 && board[r+1][c-1] == chess
+                 && board[r+2][c-2] == chess
+                 && board[r+3][c-3] == chess
+                 && board[r+4][c-4] == chess) {
+                    // 构成了5子连珠，胜负已经分。
+                    return chess == 1 ? user1.getUserId() : user2.getUserId();
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                continue;
+            }
+        }
 
         return 0;
     }

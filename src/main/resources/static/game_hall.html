@@ -40,16 +40,19 @@
 
         // 此处进行初始化 websocket,并且实现前端的匹配逻辑
         // 此处的的路径必须写成 /findMatch , Not /findMatch/
-        let websocket = new WebSocket('ws://127.0.0.1:8080/findMatch');
+        let websocket = new WebSocket('ws://127.0.0.0:8080/findMatch');
         websocket.onopen = function() {
             console.log("onOpen");
         }
         websocket.onclose = function() {
             console.log("onClose");
-            // 当断开连接时（比如说多开或者是客户自己断开连接的情况下），给客户一个提示信息。
-            alert("当前和服务器的连接已经断开，请重新登录！");
-            location.assign("/login.html");
+        
+            // 之前为了实现多开的效果，在这个逻辑中加入了 alert 和跳转。
+            // 如果多开了，服务器就会主动关闭 websocket 连接，导致客户端跳转到 login.html 页面
+            alert("和游戏大厅断开连接");
+            loation.assign("/login.html");
         }
+
         websocket.onerror = function() {
             console.log("onError");
         }
@@ -61,7 +64,7 @@
         }
 
         // 重点实现的方法，要处理服务器返回的响应
-        websocket.onmessage = function(e) {
+        websocket.onmessage = function() {
             // 处理服务器返回的响应数据，这个响应就是针对 “开始匹配” 或者 “停止匹配” 的
             // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成JS 对象
             // JSON 字符串和 JS 对象的转换：
@@ -83,7 +86,7 @@
                 // 结束匹配，请求发送成功
                 console.log("离开匹配对列成功！");
                 matchButton.innerHTML = '开始匹配';
-            } else if (resp.message == 'matchSuccess') {
+            } else if (rep.message == 'matchSuccess') {
                 // 已经匹配到对手了
                 console.log("匹配到对手，进入游戏房间");
                 location.assign("/game_room.html");
@@ -92,7 +95,9 @@
             }
         }
 
-        // 给匹配按钮添加 点击事件
+        // 给匹配按钮添加 点击事件.
+        // 当前的匹配功能，和用户进行交互，匹配按钮，onclick，然后与服务器交互，如何客户发请求，
+        // 服务器如何进行相应
         let matchButton = document.querySelector('#match-button');
         matchButton.onclick = function() {
             // 点击事件的回调

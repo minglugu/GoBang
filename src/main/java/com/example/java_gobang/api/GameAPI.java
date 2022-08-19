@@ -26,7 +26,7 @@ public class GameAPI extends TextWebSocketHandler {
     @Autowired
     private OnlineUserManager onlineUserManager;
 
-    // 连接成功之后的处理
+    // 连接成功之后的处理. video 55 & 56
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         GameReadyResponse resp = new GameReadyResponse();
@@ -64,6 +64,7 @@ public class GameAPI extends TextWebSocketHandler {
             // 如果一个账号，在游戏大厅，也在游戏房间，也算是多开
             resp.setOk(true);
             resp.setReason("禁止多开游戏界面");
+            resp.setMessage("repeatConnection");
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
             return;
         }
@@ -71,7 +72,8 @@ public class GameAPI extends TextWebSocketHandler {
         // 4. 设置当前玩家上线！
         onlineUserManager.enterGameRoom(user.getUserId(), session);
 
-        // 5. 把两个玩家加入到游戏房间中
+        // 5. 把两个玩家加入到游戏房间中 （此处两个user，同时执行if的逻辑操作，为多线程操作，需要考虑线程安全问题）
+        //    两个玩家都以为自己是先手。
         //    当前这个逻辑实在 game_room.html 页面加载的时候进行的。
         //    前面的创建房间/匹配过程, 是在 game_hall.html 页面中完成的.
         //    因此前面匹配到对手之后, 需要经过页面跳转, 来到 game_room.html 才算正式进入游戏房间(才算玩家准备就绪)
@@ -79,30 +81,32 @@ public class GameAPI extends TextWebSocketHandler {
         //    执行到当前逻辑, 说明玩家已经页面跳转成功了!!
         //    页面跳转, 其实是个大活~~ (很有可能出现 "失败" 的情况的)
         //    第一个玩家：
-        if (room.getUser1() == null) {
-            // 第一个玩家还尚未加入房间.
-            // 就把当前连上 websocket 的玩家作为 user1, 加入到房间中.
-            room.setUser1(user);
-            // 把先连入房间的玩家作为先手方.
-            room.setWhiteUser(user.getUserId());
-            System.out.println("玩家 " + user.getUsername() + " 已经准备就绪! 作为玩家1");
-            return;
-        }
-        //     第二个玩家：
-        if (room.getUser2() == null) {
-            // 第一个玩家还尚未加入房间.
-            // 就把当前连上 websocket 的玩家作为 user1, 加入到房间中.
-            room.setUser2(user);
-            // 把先连入房间的玩家作为先手方.
-            System.out.println("玩家 " + user.getUsername() + " 已经准备就绪! 作为玩家2");
+        synchronized (room) {
+            if (room.getUser1() == null) {
+                // 第一个玩家还尚未加入房间.
+                // 就把当前连上 websocket 的玩家作为 user1, 加入到房间中.
+                room.setUser1(user);
+                // 把先连入房间的玩家作为先手方.
+                room.setWhiteUser(user.getUserId());
+                System.out.println("玩家 " + user.getUsername() + " 已经准备就绪! 作为玩家1");
+                return;
+            }
+            //     第二个玩家：
+            if (room.getUser2() == null) {
+                // 第一个玩家还尚未加入房间.
+                // 就把当前连上 websocket 的玩家作为 user1, 加入到房间中.
+                room.setUser2(user);
+                // 把先连入房间的玩家作为先手方.
+                System.out.println("玩家 " + user.getUsername() + " 已经准备就绪! 作为玩家2");
 
-            // 当两个玩家都加入成功之后, 就要让服务器, 给这两个玩家都返回 websocket 的响应数据.
-            // 通知这两个玩家说, 游戏双方都已经准备好了.
-            // 通知玩家1, pay attention to the order of parameters of user1(thisUser) and user2(thatUser)
-            noticeGameReady(room, room.getUser1(), room.getUser2());
-            // 通知玩家2, pay attention to the order of parameters of user2(thisUser) and user1(thatUser)
-            noticeGameReady(room, room.getUser2(), room.getUser1());
-            return;
+                // 当两个玩家都加入成功之后, 就要让服务器, 给这两个玩家都返回 websocket 的响应数据.
+                // 通知这两个玩家说, 游戏双方都已经准备好了.
+                // 通知玩家1, pay attention to the order of parameters of user1(thisUser) and user2(thatUser)
+                noticeGameReady(room, room.getUser1(), room.getUser2());
+                // 通知玩家2, pay attention to the order of parameters of user2(thisUser) and user1(thatUser)
+                noticeGameReady(room, room.getUser2(), room.getUser1());
+                return;
+            }
         }
 
         // 6. 此处如果又有玩家尝试连接同一个房间, 就提示报错.

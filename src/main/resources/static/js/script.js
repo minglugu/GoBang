@@ -189,6 +189,7 @@ function initGame() {
 
             // 留到浏览器收到落子响应的时候再处理(收到响应再来画棋子)
             // 走一步（里面会 绘制一个棋子）
+
             // oneStep(col, row, gameInfo.isWhite);
             // // 设置为1，表示已经落子
             // chessBoard[row][col] = 1;
@@ -203,7 +204,7 @@ function initGame() {
             row: row,
             col: col
         };
-        // 发送操作，js对象转换成JSON格式的字符串以后，再进行发送
+        // 发送操作，js对象转换成JSON格式的字符串以后，再进行发送。然后可以在服务器端，处理这样的请求。
         websocket.send(JSON.stringify(req));
     }
 
@@ -264,5 +265,7 @@ function initGame() {
     //         let fatherDiv = document.querySelector('.container>div');
     //         fatherDiv.appendChild(backBtn);
     //     }
-    // }
+    }
+        
+    }
 }
