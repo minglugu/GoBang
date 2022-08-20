@@ -2,6 +2,7 @@ package com.example.java_gobang.game;
 
 import com.example.java_gobang.JavaGobangApplication;
 import com.example.java_gobang.model.User;
+import com.example.java_gobang.model.UserMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,11 @@ public class Room {
     // 手动注入
     // @Autowired
     private OnlineUserManager onlineUserManager;
+
+    // 这个实例，不能用@Autowire注入，因为Room这个类，不是Spring来管理的类
+    // 需要在Room() 构造方法这里，加入userMapper这个实例
+    // 注入userMapper，用来判断胜负，以及update数据库
+    private UserMapper userMapper;
 
     // 引入RoomManager，用于分出胜负后，移除所在的房间
     // 手动注入
@@ -118,6 +124,11 @@ public class Room {
         if (response.getWinner() != 0) {
             // 胜负已分
             System.out.println("游戏结束，房间即将销毁！Room Id = " + roomId + ", 获胜方为: " + response.getWinner());
+            // 跟新获胜和失败方的数据库里面的信息
+            int winUserId = response.getWinner();
+            int loseUserId = response.getWinner() == user1.getUserId() ? user2.getUserId() : user1.getUserId();
+            userMapper.userWin(winUserId);
+            userMapper.userLose(loseUserId);
             // 删除房间
             roomManager.remove(roomId, user1.getUserId(), user2.getUserId());
         }
@@ -217,7 +228,7 @@ public class Room {
                 continue;
             }
         }
-
+        // 胜负未分，return 0。
         return 0;
     }
 
@@ -231,6 +242,7 @@ public class Room {
         // 通过入口类中记录的 context 来手动获取到前面的 RoomManager 和 OnlineUserManager
         onlineUserManager = JavaGobangApplication.context.getBean(OnlineUserManager.class);
         roomManager = JavaGobangApplication.context.getBean(RoomManager.class);
+        userMapper = JavaGobangApplication.context.getBean(UserMapper.class);
     }
 
     public String getRoomId() {

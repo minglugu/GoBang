@@ -2,6 +2,7 @@ package com.example.java_gobang.api;
 
 import com.example.java_gobang.game.*;
 import com.example.java_gobang.model.User;
+import com.example.java_gobang.model.UserMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
@@ -25,6 +27,10 @@ public class GameAPI extends TextWebSocketHandler {
 
     @Autowired
     private OnlineUserManager onlineUserManager;
+
+    // 操作数据库，所以用resource
+    @Resource
+    private UserMapper userMapper;
 
     // 连接成功之后的处理. video 55 & 56
     @Override
@@ -164,6 +170,9 @@ public class GameAPI extends TextWebSocketHandler {
             onlineUserManager.exitGameRoom(user.getUserId());
         }
         System.out.println("当前用户 " + user.getUsername() + " 游戏房间连接异常!");
+
+        // 通知对手获胜
+        noticeThatUserWin(user);
     }
 
     // 连接关闭后的处理
@@ -182,5 +191,49 @@ public class GameAPI extends TextWebSocketHandler {
             onlineUserManager.exitGameRoom(user.getUserId());
         }
         System.out.println("当前用户 " + user.getUsername() + " 离开游戏房间!");
+
+        // 通知对手获胜
+        noticeThatUserWin(user);
+    }
+
+    private void noticeThatUserWin(User user) throws IOException {
+        // 1. 根据当前玩家，找到玩家所在的room
+        Room room = roomManager.getRoomByUserId(user.getUserId());
+        if (room == null) {
+            // 房间已经被释放了，也就没有“对手了”
+            System.out.println("当前房间已经释放，无需通知对手");
+            return;
+        }
+
+        // 2. 根据房间找到对手, 是获胜方
+        User thatUser = (user == room.getUser1()) ? room.getUser2() : room.getUser1();
+        // 3. 找到对手的在线状态
+        WebSocketSession webSocketSession = onlineUserManager.getFromGameRoom(thatUser.getUserId());
+        if (webSocketSession == null) {
+            // 对手也掉线了！
+            System.out.println("对手也掉线了，无需通知！");
+            return;
+        }
+
+        // 4. 构造响应，来通知对手，你是获胜方
+        GameResponse resp = new GameResponse();
+        resp.setMessage("putChess");
+        resp.setUserId(thatUser.getUserId());
+        resp.setWinner(thatUser.getUserId());
+
+        webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
+
+        // 5. 玩家掉线，也需要更新数据库里的获胜方和失败方
+        //    获胜方是thatUser
+        int winUserId = thatUser.getUserId();
+        int loseUserId = user.getUserId();
+        userMapper.userWin(winUserId);
+        userMapper.userLose(loseUserId);
+
+        // 6. 释放房间对象.不释放的话，造成roomManager里的room，越来越多，会造成内存泄露的问题
+        roomManager.remove(room.getRoomId(), room.getUser1().getUserId(), room.getUser2().getUserId());
+
+
+
     }
 }
