@@ -75,7 +75,9 @@ public class UserAPI {
         try {
             HttpSession httpSession = req.getSession(false);
             User user = (User) httpSession.getAttribute("user");
-            return user;
+            // 拿着这个 user 对象，去数据库中找，找到最新的数据
+            User newUser = userMapper.selectByName(user.getUsername());
+            return newUser;
         } catch (NullPointerException e) {
             return new User();
         }

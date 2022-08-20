@@ -242,29 +242,29 @@ function initGame() {
         setScreenText(me);
 
         // 判定游戏是否结束, 如果胜负已分，那么给出提示
-    //     let screenDiv = document.querySelector('#screen');
+        let screenDiv = document.querySelector('#screen');
         if (resp.winner != 0) {
             if (resp.winner == gameInfo.thisUserId) {
-                alert('你赢了!');
-    //            screenDiv.innerHTML = '你赢了!';
+                // alert('你赢了');
+                screenDiv.innerHTML = '你赢了!';
             } else if (resp.winner = gameInfo.thatUserId) {
-                alert('你输了!');
-    //             screenDiv.innerHTML = '你输了!';
+                // alert('你输了!');
+                screenDiv.innerHTML = '你输了!';
             } else {
                 alert("winner 字段错误! " + resp.winner);
             }
             // 胜负已分，回到游戏大厅
-            location.assign('/game_hall.html');
+            // location.assign('/game_hall.html');
 
-    //         // 增加一个按钮, 让玩家点击之后, 再回到游戏大厅~
-    //         let backBtn = document.createElement('button');
-    //         backBtn.innerHTML = '回到大厅';
-    //         backBtn.onclick = function() {
-    //             location.replace('/game_hall.html');
-    //         }
-    //         let fatherDiv = document.querySelector('.container>div');
-    //         fatherDiv.appendChild(backBtn);
-    //     }
+            // 增加一个按钮, 让玩家点击之后, 再回到游戏大厅~
+            let backBtn = document.createElement('button');
+            backBtn.innerHTML = '回到大厅';
+            backBtn.onclick = function() {
+                location.assign('/game_hall.html');
+            }
+            let fatherDiv = document.querySelector('.container>div');
+            fatherDiv.appendChild(backBtn);
+        }
     }
         
     }
