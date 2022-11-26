@@ -29,7 +29,8 @@ function setScreenText(me) {
 
 // 此处写的路径要写作 /game, 不要写作 /game/
 // 和服务器进行连接
- let websocketUrl = "ws://172.0.0.1:8080/game";
+// 见game_hall.html页面，关于websocketUrl的解释
+ let websocketUrl = "ws://" + location.host + "/game";
  let websocket = new WebSocket(websocketUrl);
 
 // 处理回调方法

@@ -40,7 +40,12 @@
 
         // 此处进行初始化 websocket,并且实现前端的匹配逻辑
         // 此处的的路径必须写成 /findMatch , Not /findMatch/
-        let websocket = new WebSocket('ws://127.0.0.0:8080/findMatch');
+        // location.host就是获取到当前页面的ip和端口号，所以不管程序部署到哪个机器上，都是需要先访问到game_hall.html的页面。
+        // 当访问到game_hall.html的这个页面，就会涉及到ip和端口。因此这里的location.host这就是在访问，game_hall.html这个页面，
+        // 同样的ip和端口。所以直接借助刚才的页面自身的地址，就可以构造出websocket的地址，这样的写法，就可以很巧妙让这个链接，
+        // 适配不同的机器。
+        let websocketUrl = 'ws://' + location.host + '/findMatch';
+        let websocket = new WebSocket(websocketUrl);
         websocket.onopen = function() {
             console.log("onOpen");
         }

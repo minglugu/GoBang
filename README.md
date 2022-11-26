@@ -2482,3 +2482,11 @@ private void noticeThatUserWin(User user) throws IOException {
 ### 虚拟对手
 
 如果当前长时间匹配不到选手, 则自动分配一个 AI 对手. 
+
+
+项目部署到服务器上面。
+1. 将项目用 maven 里，life cycle的package打包成jar包
+2. 然后拖拽到服务器的这个root目录下：[root@VM-12-6-centos ~]#
+3. 用 ls 看目录里的列表
+4. 启动程序: java -jar jar_gobang-.jar 
+启动成功后，复制session里面的外网ip。

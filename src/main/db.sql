@@ -1,3 +1,5 @@
+-- 如何连接数据库的链接：https://zhuanlan.zhihu.com/p/49046496
+
 create database if not exists java_gobang;
 
 use java_gobang;
