@@ -22,7 +22,7 @@ public class TestAPI extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         System.out.println("收到消息：" + message.getPayload()); // 返回string的类型
         // 让服务器收到数据后，把数据原封不动的返回回去，达到客户端接受这样的效果。
-        // websocket session，与http的session不一样
+        // websocket session，与http的session不一样，是两个不同的类
         // 实现消息推送的效果
         session.sendMessage(message);
     }

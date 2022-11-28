@@ -1,5 +1,6 @@
 package com.example.java_gobang.model;
 
+// 实体类User，表示了一条数据该如何表示
 public class User {
     private int userId;
     private String username;

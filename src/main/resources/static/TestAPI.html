@@ -17,12 +17,15 @@
         // 此处的4个方法，和后端TestAPI.java里的4个方法是匹配的。
         let websocket = new WebSocket("ws://127.0.0.1:8080/test");
         // 需要给实例，挂载一些回调函数
+
+        // 这个函数，在连接建立好之后，会执行。
         websocket.onopen = function() {
             console.log("连接建立");
         }
         websocket.onmessage = function(e) {
             console.log("收到消息：" + e.data);
         }
+        // 连接异常，会执行的函数
         websocket.onerror = function() {
             console.log("连接异常");
         }
@@ -30,7 +33,7 @@
             console.log("连接关闭");
         }
 
-        // 实现点击俺就后，通过websocket 发送请求
+        // 实现点击按钮后，通过websocket 发送请求
         let input = document.querySelector('#message');
         let button = document.querySelector('#submit');
         // 点击发送消息，发送的消息为input里面的内容
