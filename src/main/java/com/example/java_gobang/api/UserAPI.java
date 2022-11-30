@@ -19,7 +19,7 @@ public class UserAPI {
     @Resource // 自动注入，所以无需new一个对象
     private UserMapper userMapper;
 
-    // 当路径里面，有login时，就会触发到这个方法
+    // 当路径里面，有 /login时，就会触发到这个方法. 此处为post请求
     @PostMapping("/login")
     @ResponseBody
     public Object login(String username, String password, HttpServletRequest req) {
@@ -28,12 +28,12 @@ public class UserAPI {
         // 在UserMapper的interface里面，有selectByName()这个方法，
         User user = userMapper.selectByName(username);
         System.out.println("[login] username=" + username); // 哪个用户名在登录
-        // 对user进行判断
-        // 用户名不存在，或者用户存在但登录失败
+        // 对user进行判断：为空或者密码不匹配
+        // 用户名不存在，或者用户存在但密码不正确，即登录失败，直接返回空的无效对象
         if(user == null || !user.getPassword().equals(password)) {
             // 登录失败,返回空的对象(无效对象)
             System.out.println("登录失败！");
-            return new User();
+            return new User(); // 返回空对象
         }
         // 登录成功，返回对象的同时，还需要对session进行设置，查询到的user保存到session里面，
         // 下次访问服务器，正确识别当前客户端的身份信息。
@@ -45,7 +45,7 @@ public class UserAPI {
         return user;
     }
 
-    // 用来注册的逻辑
+    // 用来注册新用户的逻辑。score, totalCount 和 winCount 会给默认值，所以无需初始化
     @PostMapping("/register")
     @ResponseBody
     public Object register(String username, String password) {
@@ -65,15 +65,19 @@ public class UserAPI {
         }
     }
 
+    // 获取用户信息
     @GetMapping("/userInfo")
     @ResponseBody
     // HttpServletRequest req这个参数，才能拿到session
     public Object getUserInfo(HttpServletRequest req) {
         //不需要查询数据库，从session里面，直接获取到对应user对象，并返回
         // 已经登录完了，不需要再创建新的session，所以就设置成false
-        // 判断是否空，所以用try catch
+        // 判断user是否空，所以用try catch
         try {
             HttpSession httpSession = req.getSession(false);
+            // 获取到的user对象。前面是使用user对象的key来存储的(line 43)。同样用user这个key来获取。
+            // 获取出来的结果默认是object类型，所以cast User对象，此处转换没有问题。因为
+            //从前面register存的时候，就是存的对象。
             User user = (User) httpSession.getAttribute("user");
             // 拿着这个 user 对象，去数据库中找，找到最新的数据
             User newUser = userMapper.selectByName(user.getUsername());

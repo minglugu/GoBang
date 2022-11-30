@@ -24,19 +24,20 @@ html, body {
     background-image: url(../image/cat.jpg);
     background-repeat: no-repeat;
     background-position: center; /*垂直水平居中*/
-    background-size: cover; 
+    background-size: cover; /*图片铺满整个背景*/
 } 
 
+/* nav bar */
 .nav {
     height: 50px;
     background-color:rgb(50,50,50);
     color: white;
     /*行高：文本高度+行间距，默认的行间距是上下两侧等分的
-    把行高设置成元素高度一样的时候，那么文字就是垂直居中的效果*/
+    把行高设置成元素高度(height)一样的时候，那么文字就是垂直居中的效果*/
     line-height: 50px;
     padding-left: 20px;
 }
-/* 博客系统，导航栏更加复杂，会有logo，会有按钮，等空的时候，实现以下 */
+/* 博客系统，导航栏更加复杂，会有logo，会有按钮，等空的时候，实现一下 */
 
 /* 里面的元素垂直水平居中（display, align-items, justify-content） */
 .container {

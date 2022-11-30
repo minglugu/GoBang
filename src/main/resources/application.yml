@@ -4,7 +4,7 @@ spring:
     username: root
     # 数据库没有密码的情况下，设置成""，在deploy到腾讯云的CentOS 7的linux服务器上
     # 本地电脑的话，就写自己设置的MySQL的密码
-    password: ""
+    password: 111111
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 # 要在哪个路径下，加载这个配置文件
