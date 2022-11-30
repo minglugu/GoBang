@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/game_hall.css">
 </head>
 <body>
-    <div class="nav">Gobang</div>
+    <div class="nav">Online Gobang</div>
     <!-- 整个页面的容器元素 -->
     <div class="container">
         <!-- 这个div 在container 中是处于垂直水平居中这样的位置 -->
@@ -26,9 +26,12 @@
         // 页面加载的时候，发送的请求。从服务器获取玩家信息，再返回前端页面
         $.ajax({
             type: 'get',
-            url: '/userInfo',
-            success: function(body) {
-                // 获取screen这个标签
+            url: '/userInfo',   // 对应后端代码的路径
+                                // 因为是 get 请求，所以没有 body 部分，就不需要 data 属性
+            success: function(body) {   
+                // 获取screen这个标签。
+                // 获取的数据为 后端 UserAPI.java getUserInfo 里面return 的 user 对象。
+                // 获取到的 user 对象里面的信息：body.username ... 跟 Model 里面的 User 的属性是对应/一致的。
                 let screenDiv = document.querySelector('#screen');
                 screenDiv.innerHTML = '玩家：' + body.username + '   分数：' + body.score 
                     + '<br> 比赛场次：' + body.totalCount + '   获胜场数：' + body.winCount
@@ -45,6 +48,7 @@
         // 同样的ip和端口。所以直接借助刚才的页面自身的地址，就可以构造出websocket的地址，这样的写法，就可以很巧妙让这个链接，
         // 适配不同的机器。
         let websocketUrl = 'ws://' + location.host + '/findMatch';
+        // let websocket = new WebSocket('ws://127.0.0.1:8080/findMatch');
         let websocket = new WebSocket(websocketUrl);
         websocket.onopen = function() {
             console.log("onOpen");
@@ -64,14 +68,18 @@
         
         // 监听页面关闭事件，在页面关闭之前，手动调用这里的 websocket 的close 方法。
         // 告诉server，用户退出了。
+        // 关闭页面时，触发的事件。
         window.onbeforeunload = function() {
             websocket.close();
         }
 
-        // 重点实现的方法，要处理服务器返回的响应
-        websocket.onmessage = function() {
+        // 匹配相应2
+        // 点击按钮，进行匹配。这是重点实现的方法，要处理服务器返回的响应
+        // 分三种情况：开始匹配，停止匹配，和匹配到了
+        // 此处，忘记传参数 e 了
+        websocket.onmessage = function(e) {
             // 处理服务器返回的响应数据，这个响应就是针对 “开始匹配” 或者 “停止匹配” 的
-            // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成JS 对象
+            // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成 JS 对象
             // JSON 字符串和 JS 对象的转换：
             // JSON -> JS object: JSON.parse()
             // JS -> JSON字符串: JSON.stringify()
@@ -81,10 +89,10 @@
                 console.log("游戏大厅中，接收到了失败响应！" + resp.reason);
                 return;
             }
-            // 结果是true了，有如下三种情况
+            // 结果resp.ok是true了，有如下三种情况: startMatch, stopMatch, matchSuccess
             if (resp.message == 'startMatch') {
                 // 开始匹配，请求发送成功
-                console.log("进入匹配队列");
+                console.log("进入匹配队列成功！");
                 // 修改按钮里的文本
                 matchButton.innerHTML = '匹配中...(点击停止)';
             } else if (resp.message == 'stopMatch') {
@@ -105,7 +113,8 @@
             }
         }
 
-        // 给匹配按钮添加 点击事件.
+        // 匹配相应1. 只是把数据发出去了，服务器给什么样的响应，还要在 websocket.onmessage = function() 里面进行判断
+        // 给匹配按钮添加一个点击事件.
         // 当前的匹配功能，和用户进行交互，匹配按钮，onclick，然后与服务器交互，如何客户发请求，
         // 服务器如何进行相应
         let matchButton = document.querySelector('#match-button');
@@ -129,9 +138,9 @@
                     }));
                 }
             } else {
-                // 这是说明，连接当前是异常的状态
+                // 这是说明，连接当前是异常的状态，不能发送数据
                 alert("当前连接已经断开！请重新登录。");
-                // 不会回到上一页页面
+                // 不会回到上一页页面，重新定向到login.html
                 location.replace('/login.html');
             }
         } 

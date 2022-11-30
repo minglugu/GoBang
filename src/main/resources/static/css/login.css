@@ -66,8 +66,9 @@
     font-size: medium;
 }
 
+/* 按下按钮后的效果 */
 #submit:active {
-    background-color:#666;
+    background-color: #666;
 }
 
 

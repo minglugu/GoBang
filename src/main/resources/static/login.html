@@ -52,8 +52,11 @@
                 url: '/login',
                 data: {
                     username: usernameInput.value,
-                    password: passwordInput.value,
+                    password: passwordInput.value,  //  前后端约定的 body 部分的键值对，用JSON来组织
                 },
+                // 服务器返回的数据(响应)，约定是 JSON 格式。
+                // 当 ajax拿到响应之后，就会把响应的字符串内容，转换成 JS 中的对象，也就是参数的 body。 
+                // 这个参数 body 就是服务器返回的 user。 所以需要判断 body，是否是有效对象。
                 success: function(body) {
                     // 请求执行成功之后的回调函数
                     // 判定当前是否登录成功
@@ -63,15 +66,16 @@
                     // body是否是个有效对象
                     if (body && body.userId > 0) {
                         //登录成功
-                        alert("登录成功");
+                        alert("登录成功！");
                         // 重定向转跳到“游戏大厅页面”
                         location.assign('/game_hall.html');
                     } else {
-                        alert("登录失败");
+                        alert("登录失败！"); // 弹框告诉用户，登录出问题了。
                     }
                 },
                 error: function() {
                     // 请求执行失败之后的回调函数
+                    // 比如说404，500 error
                     alert("登录失败");
                 }
 

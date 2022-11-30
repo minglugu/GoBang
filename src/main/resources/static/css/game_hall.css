@@ -6,7 +6,10 @@
     color: white;
     border-radius: 10px;
 
+    /* 文字水平方向居中 */
     text-align: center;
+    /* 让文字垂直方向居中，只有一行文本的时候，让line-height 和 height 一致 
+       此处有两行文本，所以将文本的行高，设置成 100px*/
     line-height: 100px;
 }
 
@@ -24,6 +27,7 @@
     text-align: center;
     line-height: 50px;
     margin-top: 20px;
+
 }
 
 #match-button:active {

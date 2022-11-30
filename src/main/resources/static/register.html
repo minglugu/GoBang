@@ -20,7 +20,7 @@
             <!--这个表示一行-->
             <div class="row">
                 <!--提示信息-->
-                <span>User Name</span>
+                <span>Username</span>
                 <input type="text" id="username">
             </div>
             <!--这是另一行-->
@@ -32,7 +32,7 @@
             <!-- ctrl+/,生成注释的快捷键 -->
             <!-- 提交按钮 -->
             <div class="row">
-                <button id="submit">submit</button>
+                <button id="submit">Submit</button>
             </div>
         </div>
     </div>
@@ -44,27 +44,35 @@
 
         submitButton.onclick = function() {
             // ajax应该放在submit按钮的点击回调函数里面
+            // 根据前后端交互的约定(HTTP request)，来写 ajax 里面的内容 
             $.ajax({
-            type: 'post',
-            url: '/register',
-            data: {
-                username: usernameInput.value,
-                password: passwordInput.value,
-            },
-            success: function(body) {
-                // 如果注册成功，就会返回一个新注册的用户对象，会存放在body这个参数中。
-                if(body && body.username) {
-                    //注册成功
-                    alert("注册成功！");
-                    location.assign('/login.html');
-                } else {
-                    alert("注册失败！");
+                type: 'post',
+                url: '/register',
+                data: {
+                    username: usernameInput.value,
+                    password: passwordInput.value,
+                },
+                success: function(body) {
+                    // 如果注册成功，就会返回一个新注册的用户对象，会存放在body这个参数中。
+                    if(body && body.username) {
+                        //注册成功
+                        alert("注册成功！");
+                        location.assign('/login.html');
+                        /* 此处与后端交互，逻辑是：
+                           1. 在UserAPI这里，注册的时候，new 了一个 user，设置用户名和密码，再用userMapper插入数据库。
+                           再插入成功之后，返回user，并且不包含userId。user id是插入数据库之后，数据库生成的。
+                           2. 修改mybatis里面的配置，将自增组件返回，放到user的user id里面。不是非常必要的操作，用 username 来
+                           判断，是否注册成功。
+                            */
+
+                    } else {
+                        alert("注册失败！");
+                    }
+                },
+                error: function() {
+                    alert("注册失败");
                 }
-            },
-            error: function() {
-                alert("注册失败");
-            }
-        });
+            });
         }
    </script>
 </body>
