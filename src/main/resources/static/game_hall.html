@@ -53,6 +53,7 @@
         websocket.onopen = function() {
             console.log("onOpen");
         }
+
         websocket.onclose = function() {
             console.log("onClose");
         
@@ -66,23 +67,63 @@
             console.log("onError");
         }
         
-        // 监听页面关闭事件，在页面关闭之前，手动调用这里的 websocket 的close 方法。
+        // 监听页面关闭事件，在页面关闭之前，手动调用这里的 websocket 的close() 方法。
         // 告诉server，用户退出了。
         // 关闭页面时，触发的事件。
         window.onbeforeunload = function() {
             websocket.close();
         }
 
+        // 匹配相应1. 
+        // 只是把数据发出去了，服务器给什么样的响应，还要在 websocket.onmessage = function() 里面进行判断
+        // 给匹配按钮添加一个点击事件.
+        // 当前的匹配功能，和用户进行交互，匹配按钮，onclick，然后与服务器交互，如何客户发请求，
+        // 服务器如何进行相应
+        let matchButton = document.querySelector('#match-button');
+        matchButton.onclick = function() {
+            // 点击事件的回调
+            // 触发websocket请求之前，先确认一下，websocket 连接是否好着呢
+            // 检测，websocket 是否在连接的状态。
+            // websocket.readyState: The current state of the connection.
+            // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+            if (websocket.readyState == websocket.OPEN) {
+                // 如果当前 readyState 处在 OPEN 状态，说明连接是好的，可以发送数据
+                // 这里发送的数据有两种可能，开始匹配/停止匹配。此处有两种情况，需要分开处理。
+                // 当发送的请求时“开始匹配”时
+                if (matchButton.innerHTML == '开始匹配') {
+                    console.log("开始匹配");
+                    // websocket 就会将 JS object 转成 JSON string，发送startMatch请求
+                    // JSON.stringify：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+                    websocket.send(JSON.stringify({                        
+                            message: 'startMatch',  // 此处的参数，是具体的JSON对象。
+                    }));
+                } else if (matchButton.innerHTML == '匹配中...(点击停止)') {
+                    // 发送停止匹配的请求
+                    console.log("停止匹配");
+                    websocket.send(JSON.stringify({
+                        message: 'stopMatch',                        
+                    }));
+                }
+            } else {
+                // 这是说明，连接当前是异常的状态，不能发送数据
+                alert("当前连接已经断开！请重新登录。");
+                // 不会回到上一页页面，重新定向到login.html
+                location.replace('/login.html');
+            }
+        } 
+
         // 匹配相应2
         // 点击按钮，进行匹配。这是重点实现的方法，要处理服务器返回的响应
         // 分三种情况：开始匹配，停止匹配，和匹配到了
-        // 此处，忘记传参数 e 了
+        // 此处，忘记传参数 e 了，导致项目运行有些小错误。
         websocket.onmessage = function(e) {
+            // 解析的对象在参数 e 里面
             // 处理服务器返回的响应数据，这个响应就是针对 “开始匹配” 或者 “停止匹配” 的
             // 解析得到的响应对象，返回的数据是一个JSON字符串，解析成 JS 对象
             // JSON 字符串和 JS 对象的转换：
             // JSON -> JS object: JSON.parse()
             // JS -> JSON字符串: JSON.stringify()
+            // e.data 就是websocket返回的响应数据的载荷数据。
             let resp = JSON.parse(e.data);
             let matchButton = document.querySelector('#match-button');
             if (!resp.ok) {
@@ -99,7 +140,7 @@
                 // 结束匹配，请求发送成功
                 console.log("离开匹配对列成功！");
                 matchButton.innerHTML = '开始匹配';
-            } else if (rep.message == 'matchSuccess') {
+            } else if (resp.message == 'matchSuccess') {
                 // 已经匹配到对手了
                 console.log("匹配到对手，进入游戏房间");
                 // 防止用户回退操作
@@ -113,37 +154,7 @@
             }
         }
 
-        // 匹配相应1. 只是把数据发出去了，服务器给什么样的响应，还要在 websocket.onmessage = function() 里面进行判断
-        // 给匹配按钮添加一个点击事件.
-        // 当前的匹配功能，和用户进行交互，匹配按钮，onclick，然后与服务器交互，如何客户发请求，
-        // 服务器如何进行相应
-        let matchButton = document.querySelector('#match-button');
-        matchButton.onclick = function() {
-            // 点击事件的回调
-            // 触发websocket请求之前，先确认一下，websocket 连接是否好着呢
-            if (websocket.readyState == websocket.OPEN) {
-                // 如果当前 readyState 处在 OPEN 状态，说明连接是好的，可以发送数据
-                // 这里发送的数据有两种可能，开始匹配/停止匹配。此处有两种情况，需要分开处理。
-                if (matchButton.innerHTML == '开始匹配') {
-                    // 发送开始匹配的请求
-                    console.log("开始匹配");
-                    websocket.send(JSON.stringify({                        
-                            message: 'startMatch',
-                    }));
-                } else if (matchButton.innerHTML == '匹配中...(点击停止)') {
-                    // 发送停止匹配的请求
-                    console.log("停止匹配");
-                    websocket.send(JSON.stringify({
-                        message: 'stopMatch',                        
-                    }));
-                }
-            } else {
-                // 这是说明，连接当前是异常的状态，不能发送数据
-                alert("当前连接已经断开！请重新登录。");
-                // 不会回到上一页页面，重新定向到login.html
-                location.replace('/login.html');
-            }
-        } 
+        
     </script>
 </body>
 </html>

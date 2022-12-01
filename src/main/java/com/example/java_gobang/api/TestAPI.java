@@ -6,6 +6,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+// 处理客户端的请求，与服务器连接
 @Component
 public class TestAPI extends TextWebSocketHandler {
 

@@ -4,7 +4,7 @@ package com.example.java_gobang.game;
 public class MatchResponse {
     private boolean ok;
     private String reason;
-    private String message; // 和请求里面的message是相匹配的
+    private String message; // 和请求 MatchRequest 里面的message是相匹配的
 
     public boolean isOk() {
         return ok;

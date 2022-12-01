@@ -6,7 +6,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-// 这个类表示用户的在线状态，可以管理游戏大厅和游戏房间的状态
+// 这个类表示用户的在线状态，可以管理游戏大厅和游戏房间的状态。是在线用户管理器
 @Component
 public class OnlineUserManager {
     // 这个哈希表，就用来表示当前用户在游戏大厅在线状态。
@@ -18,6 +18,7 @@ public class OnlineUserManager {
 
     // 游戏大厅的方法
     // 进入游戏大厅
+    // 拿到用户的id和session，存到hashmap里。
     public void enterGameHall(int userId, WebSocketSession webSocketSession) {
         gameHall.put(userId, webSocketSession);
     }
