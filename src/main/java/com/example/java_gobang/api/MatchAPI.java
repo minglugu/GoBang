@@ -51,15 +51,16 @@ public class MatchAPI extends TextWebSocketHandler {
         try {
             User user = (User) session.getAttributes().get("user"); //得到 user 对象。
             // 2. 先判定当前用户，是否已经登陆过(已经是在线状态)，如果是已经在线，就不继续进行后续逻辑（不许多次登录。。。）。
-            //    多开的问题：用户打开多个浏览器，尝试登录。那么userId的value是唯一的，但每次连接的session不一样。
+            //    多开的问题：用户打开多个浏览器，尝试登录。那么userId的value是唯一的，但每次连接，产生的session不一样。
             //    那么存在hashmap里的 value 会被后来的session value给覆盖掉。
+            //    所以此处的逻辑是，禁止多开。
             if (onlineUserManager.getFromGameRoom(user.getUserId()) != null
                     || onlineUserManager.getFromGameHall(user.getUserId()) != null) {
                 // 当前用户已经登录
                 // 针对这个情况，通过构造 MatchResponse 要告知客户端，这里重复登录
                 MatchResponse response = new MatchResponse();
                 response.setOk(true);
-                response.setReason("当前禁止多开");
+                response.setReason("当前禁止多开(同个用户重复登录)");
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
                 // 关掉websocket连接, 断开与服务器的连接。
                 // 关掉的这个操作，会立即触发 afterConnectionClosed()，会有一个exitGameHall 这个做移除操作。

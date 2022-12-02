@@ -6,26 +6,27 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 // 房间管理器类
-// 此类也是唯一实例
+// 此类也是唯一实例. 有一个房间管理器就可以管所有房间了
+// 视频 #40 - #
 @Component
 public class RoomManager {
-    // Interger：用户id，String：房间id
+    // Integer：用户id，String：房间id, 根据玩家的id，找到玩家所属的房间，即对应的房间id。
     private ConcurrentHashMap<Integer, String> userIdToRoomId = new ConcurrentHashMap<>();
     // 房间Id对应的Room object
     private ConcurrentHashMap<String, Room> rooms = new ConcurrentHashMap<>();
 
 
     // 相房间管理器里面添加元素
-    // key通过room可以拿到
+    // key通过room可以拿到，添加房间room的时候，把userId 也同时加进去。
     public void add(Room room, int userId1, int userId2) {
-        // 映射关系：userId1, userId2 -> roomId
+        // 映射关系：userId1, userId2 -> roomId 加到一个hashmap userIdToRoomId里
         userIdToRoomId.put(userId1, room.getRoomId());
         userIdToRoomId.put(userId2, room.getRoomId());
-        // 映射关系：roomId -> room
+        // 映射关系：roomId -> room 加到第二个hashmap rooms里
         rooms.put(room.getRoomId(), room);
     }
 
-    // 删除房间
+    // 所以删除房间的时候，要同时移除房间id和其中两个用户的id
     public void remove(String roomId, int userId1, int userId2) {
         rooms.remove(roomId);
         userIdToRoomId.remove(userId1);

@@ -13,11 +13,13 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.UUID;
 
-// 这个类，是一个游戏房间
+// 这个类，表示一个游戏房间
 public class Room {
     // 使用字符串类型来表示，用于生成唯一值。
+    // 用键值对的方式，管理若干个房间。此时，key是房间id。
     private String roomId;
 
+    // 房间里的两个玩家的信息
     private User user1;
     private User user2;
 
