@@ -214,13 +214,25 @@ protected void handleTextMessage(WebSocketSession session, TextMessage message) 
     session.sendMessage(new TextMessage(jsonString));
 
 --------------------------------------------------------------------------------------------------------------------------------
- till video #44
+ 
+ 同一个用户，多次登录。需要断开后面登录的页面，同时还要在界面上有个明确的提示。
+ 此处需要调整前端代码game_hall.html，当检测到多开的时候，就给用户一个明确的提示。
 
-
-
+        websocket.onclose = function() {
+            console.log("onClose");
+        
+            // 之前为了实现多开的效果，在这个逻辑中加入了 alert 和跳转。
+            // 如果多开了，服务器就会主动关闭 websocket 连接，导致客户端跳转到 login.html 页面
+            alert("和游戏大厅断开连接");
+            loation.replace("/login.html");
+        }
 
 --------------------------------------------------------------------------------------------------------------------------------
 
+location.replace vs location.assign
+URL: https://developer.mozilla.org/en-US/docs/Web/API/Location/replace
+
+The replace() method of the Location interface replaces the current resource with the one at the provided URL. The difference from the assign() method is that after using replace() the current page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
 
 
 

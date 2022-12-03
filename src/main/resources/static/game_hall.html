@@ -59,8 +59,9 @@
         
             // 之前为了实现多开的效果，在这个逻辑中加入了 alert 和跳转。
             // 如果多开了，服务器就会主动关闭 websocket 连接，导致客户端跳转到 login.html 页面
+            // location.replace vs location.assign
             alert("和游戏大厅断开连接");
-            loation.replace("/login.html");
+            location.replace("/login.html");
         }
 
         websocket.onerror = function() {
