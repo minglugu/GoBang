@@ -235,10 +235,100 @@ URL: https://developer.mozilla.org/en-US/docs/Web/API/Location/replace
 The replace() method of the Location interface replaces the current resource with the one at the provided URL. The difference from the assign() method is that after using replace() the current page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
 
 
+--------------------------------------------------------------------------------------------------------------------------------
+Clear cache: ctrl + f5
+
+修改JS 代码以后，刷新页面的时候，要使用 ctrl + f5 强制刷新页面，因为可能还是运行的是旧版本 JS 的代码。因为浏览器是有缓存的(cache)
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+Summary of matching two players：视频 #46
+
+1. 点击开始匹配之后 
+   1）先触发 JS 中的按钮的点击事件回调。matchButton.onclick() in game_hall.html
+      websocket.send(JSON.stringify(...)), 来给服务器发送请求。
+        matchButton.onclick = function() {
+            // 点击事件的回调
+            // 触发websocket请求之前，先确认一下，websocket 连接是否好着呢
+            // 检测，websocket 是否在连接的状态。
+            // websocket.readyState: The current state of the connection.
+            // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+            if (websocket.readyState == websocket.OPEN) {
+                // 如果当前 readyState 处在 OPEN 状态，说明连接是好的，可以发送数据
+                // 这里发送的数据有两种可能，开始匹配/停止匹配。此处有两种情况，需要分开处理。
+                // 当发送的请求时“开始匹配”时
+                if (matchButton.innerHTML == '开始匹配') {
+                    console.log("开始匹配");
+                    // websocket 就会将 JS object 转成 JSON string，发送startMatch请求给服务器。
+                    // JSON.stringify：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+                    websocket.send(JSON.stringify({                        
+                            message: 'startMatch',  // 此处的参数，是具体的JSON对象。
+                    }));
+
+    2）服务器处理这个匹配请求。
+       在handleTextMeesage()这个方法里 in MatcherAPI.java 这个类里。
+       按照 JSON 格式，给当前请求的内容，进行解析。此处的payload，就是刚才websocket发送的数据(上面1）部分的数据)。在解析成 MatchRequest 对象，其中只有一个关键的字段(attribute)，叫message。用来区分，是匹配还是停止匹配的(startMatch / stopMatch)。
+
+       关键操作：
+       a) 然后再调用matcher.add(user), 将用户加入到响应的匹配队列中。（Match.java 的 add() 操作）
+       b) 用这两行代码，服务器把响应立即发回给客户端，把用户加入到匹配队列。(in MatcherAPI.java)
+          String jsonString = objectMapper.writeValueAsString(response);
+          session.sendMessage(new TextMessage(jsonString));
+       c) 客户端game_hall.html在收到响应后，在 websocket.onmessage 这里，收到一个匹配请求。
+          resp = JSON.parse(e.data)  // 和 line275 的response对象 是和 resp 对应的
+          当收到这个匹配响应之后 resp.message == 'startMatch' ， 打印日志，
+          并更新按钮中的文本：
+          console.log("进入匹配队列成功！")
+          matchButton.innerHTML = '匹配中...(点击停止)'
+
+          MatchResponse.java 中 message 是关键，通过它来区分，当前的响应是“进入匹配队列” 还是“移除匹配队列”。
+
+    4. 匹配器Matcher的处理
+    将用户加入匹配队列后，Matcher.java 中的三个匹配队列，就有用户/元素了。在 Matcher.java 里，线程会扫描匹配队列，调用 handlerMatch()，
+    由于当前只有一个玩家，点击了开始匹配，此时队列中，也就只有一个元素。因此扫描线程，就会在wait()处，阻塞。
+
+
+    5. 当前，又有一个玩家点击匹配操作。流程同 a), b) and c).
+    此时，就可能从匹配队列的wait()中返回了。
+    于是，执行匹配逻辑。
+
+    6. 关键的操作在Matcher.java 的第4步，把这两个玩家，放到一个游戏房间中
+    Room room = new Room();
+    roomManager.add(room, player1.getUserId(), player2.getUserId())
+
+    7. RoomManager.java 里面有两个 ConcurrentHashMap 对象。键值对的映射关系。
+       
+--------------------------------------------------------------------------------------------------------------------------------
+#47
+实现两个玩家，在游戏房间中的对战：下五子棋
+约定前后端的接口。
+
+1. 建立连接
+ws://127.0.0.1:8080/game
+
+2. 建立连接的响应
+
+3. 针对“落子”的请求和响应
+   [row][col]
+
+--------------------------------------------------------------------------------------------------------------------------------
+游戏房间的设计
+game_room.html
+
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 
 

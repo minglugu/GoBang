@@ -89,7 +89,11 @@ public class MatchAPI extends TextWebSocketHandler {
         }
     }
 
-    // 实现处理开始匹配请求和处理停止匹配请求
+    // 实现处理来自客户端的开始匹配请求和处理停止匹配请求
+    /*
+       @param session: 客户端的websocket session
+       @param message: 客户端发来的 startMatch 和 stopMatch 的 message
+     */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         User user = (User)session.getAttributes().get("user");
