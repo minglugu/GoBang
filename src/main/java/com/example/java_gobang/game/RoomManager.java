@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 // 房间管理器类
-// 此类也是唯一实例. 有一个房间管理器就可以管所有房间了
-// 视频 #40 - #
+// 此类也是唯一实例. 有一个房间管理器就可以管所有房间了。直接注册到Spring中，进行管理。
+// 因此在Matcher.java 这个类里，用Autowired 来注入，直接获得实例。
+// 视频 #40 - #43
 @Component
 public class RoomManager {
     // Integer：用户id，String：房间id, 根据玩家的id，找到玩家所属的房间，即对应的房间id。

@@ -123,6 +123,7 @@ public class MatchAPI extends TextWebSocketHandler {
         // 服务器这边在处理 匹配请求的时候，是要立即返回一个 websocket 响应的
         // 虽然在服务器代码这里构造了响应对象，但是忘记sendMessage，给发回去了
         // 一开始写代码的时候，没有这两行，所以console.log里面没有返回的数据信息
+        // 服务器的 response，需要返回给前端。
         String jsonString = objectMapper.writeValueAsString(response);
         session.sendMessage(new TextMessage(jsonString));
     }

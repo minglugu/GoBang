@@ -23,10 +23,11 @@ public class Matcher {
     @Autowired
     private OnlineUserManager onlineUserManager;
 
+    // 引入房间管理器，将两个用户添加到游戏房间里。
     @Autowired
     private RoomManager roomManager;
 
-    // 不实例化，会造成空指针异常。
+    // 不实例化，会造成空指针异常。所以要new一个实例对象。
     private ObjectMapper objectMapper = new ObjectMapper();
 
     // 操作匹配队列的方法

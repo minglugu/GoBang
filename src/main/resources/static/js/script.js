@@ -268,4 +268,4 @@ function initGame() {
     }
         
     }
-}
+
