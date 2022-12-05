@@ -93,7 +93,7 @@
                 // 当发送的请求时“开始匹配”时
                 if (matchButton.innerHTML == '开始匹配') {
                     console.log("开始匹配");
-                    // websocket 就会将 JS object 转成 JSON string，发送startMatch请求
+                    // websocket 就会将 JS object 转成 JSON string，发送startMatch请求给服务器
                     // JSON.stringify：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
                     websocket.send(JSON.stringify({                        
                             message: 'startMatch',  // 此处的参数，是具体的JSON对象。
