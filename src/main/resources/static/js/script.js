@@ -1,7 +1,8 @@
 // websocket的初始化过程，需要了解
 
+// 用全局变量来记录，游戏的初始化信息，根据前后端的约定
 // 客户端发给服务器请求，然后服务器会给客户端返回的响应。
-// 用全局变量来记录，并初始化信息
+// 
 let gameInfo = {
     roomId: null,
     thisUserId: null,
@@ -86,17 +87,21 @@ websocket.onmessage = function(event) {
 
 //////////////////////////////////////////////////
 // 初始化一局游戏
+// chessBoard[] 表示当前游戏中的棋盘。
+// 通过这个棋盘来表示当前哪个位置上有子了。
+// 当玩家点击的时候，如果有子的位置，就不能继续落子了。
+// 0表示空闲位置，非0是已经落子了。
 //////////////////////////////////////////////////
 function initGame() {
     // 是我下还是对方下. 根据服务器分配的先后手情况决定， me=true，我下
     let me = gameInfo.isWhite;
-    // 游戏是否结束
+    // 游戏是否结束，true结束了，false没结束
     let over = false;
-    // 构造 2D array 的棋盘
+    // 构造 2D array 的棋盘。（二维数组，表示棋面）
     let chessBoard = [];
     //初始化chessBord数组(表示棋盘的数组) 15 x 15 
     for (let i = 0; i < 15; i++) {
-        chessBoard[i] = [];
+        chessBoard[i] = []; // 每个元素是个小数组
         // 针对小数组，再次添加元素，初始化为0
         for (let j = 0; j < 15; j++) {
             chessBoard[i][j] = 0;
@@ -105,12 +110,13 @@ function initGame() {
     // canvas API
     // 拿到canvas标签
     let chess = document.querySelector('#chess');
-    let context = chess.getContext('2d'); // 通过上下文，进入到canvas
+    // 通过上下文，进入到canvas
+    let context = chess.getContext('2d'); 
     context.strokeStyle = "#BFBFBF";
     // 背景图片
     let logo = new Image();
     logo.src = "image/snow.jpg";
-    // 加载
+    // 加载图片之后，在画布上绘制具体内容
     logo.onload = function () {
         // 把图片画上去
         context.drawImage(logo, 0, 0, 450, 450);
@@ -118,7 +124,7 @@ function initGame() {
         initChessBoard();
     }
 
-    // 绘制棋盘网格，循环绘制，moveTo kineTo 画笔进行绘制
+    // 这段逻辑，是用来绘制棋盘网格，循环绘制，moveTo要开始画线了，lineTo线从哪里到哪里，用画笔进行绘制
     function initChessBoard() {
         for (let i = 0; i < 15; i++) {
             context.moveTo(15 + i * 30, 15);
@@ -131,13 +137,15 @@ function initGame() {
     }
 
     // 绘制一个棋子, me 为 true， 参照MDN manual
+    // isWhite 是黑子还是白子
     function oneStep(i, j, isWhite) {
+        // 开始一个路径
         context.beginPath();
-        // 画圆
+        // 画圆，参数细节。
         context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);
         context.closePath();
         var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
-        // 白子还是黑子
+        // 白子还是黑子，棋子白色和黑色做了调整
         if (!isWhite) {
             gradient.addColorStop(0, "#0A0A0A");
             gradient.addColorStop(1, "#636766");
@@ -156,14 +164,17 @@ function initGame() {
         if (over) {
             return;
         }
+        // 游戏结束了，点击没有效果。当前落子没有轮到你，点击也没有效果。
         if (!me) {
             return;
         }
+        // 拿到点击位置的坐标
         let x = e.offsetX;
         let y = e.offsetY;
         // 注意, 横坐标是列, 纵坐标是行
         // /30 是为了点击操作，能够对应到网格线上。因为总体的棋盘size是450*450，col and row是15*15
         // 每格占用 450 / 15 = 30 
+        // 如果点歪了，自动放到两条线的交叉点的位置
         let col = Math.floor(x / 30);
         let row = Math.floor(y / 30);
         if (chessBoard[row][col] == 0) {
@@ -221,8 +232,9 @@ function initGame() {
 
         // 先判定当前这个响应是自己落的子, 还是对方落的子.
         if (resp.userId == gameInfo.thisUserId) {
-            // 我自己落的子
+            // 我自己落的子, 即轮到我走一步，
             // 根据我自己子的颜色, 来绘制一个棋子
+            // 判定这个地方落子了，不能再次落子。
             oneStep(resp.col, resp.row, gameInfo.isWhite);
         } else if (resp.userId == gameInfo.thatUserId) {
             // 我的对手落的子
