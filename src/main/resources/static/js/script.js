@@ -27,9 +27,9 @@ function setScreenText(me) {
 // 初始化 websocket
 //////////////////////////////////////////////////
 
-
+// 和服务器建立连接
 // 此处写的路径要写作 /game, 不要写作 /game/
-// 和服务器进行连接
+// 与本地电脑连接：let websocketUrl = new WebSocket('ws://127.0.0.1:8080/game');
  let websocketUrl = "ws://" + location.host + "/game";
  let websocket = new WebSocket(websocketUrl);
 
@@ -54,8 +54,10 @@ window.onbeforeunload = function() {
 
 // 处理服务器返回的响应数据，比较关键的步骤。 #51 视频
 websocket.onmessage = function(event) {
+    // 游戏就绪之后，需要进行的处理。包含具体的消息内容：event.data,
+    // 预期返回的 JSON 数据
     console.log("[handlerGameReady] " + event.data);
-    // 转换成对象
+    // 拿回的数据再转换成对象，类似匹配页面的逻辑
     let resp = JSON.parse(event.data);
 
     if (!resp.ok) {

@@ -324,17 +324,41 @@ game_room.html (这个页面就是匹配成功之后，要跳转到的新页面)
 
 canvas 常常用于开发游戏画面
 
-
-
-
-
-
-
-
 --------------------------------------------------------------------------------------------------------------------------------
 
+script.js
+这段代码表示，当连接建立好之后。
+websocket.onopen = function() {
+    console.log("连接游戏房间成功!");
+}
 
+处理服务器返回的响应数据。
+websocket.onmessage = function(event){
 
+}
+连接建立好之后，服务器就会返回如下格式的响应。
+建立连接响应
+服务器要生成一些游戏的初始信息，通过这个响应，告诉客户端
+{
+    message:    'gameReady',    // 消息的类别是 游戏就绪
+    ok:         true,            
+    reason:     '',             
+    roomId:     '123456789',    // 玩家所处的房间id
+    thisUserId: 1,              // 玩家自己的id
+    thatUserId: 2,              // 玩家对手的id
+
+    whiteUser:  1               // 哪个玩家是执白字(先下棋，落子)
+}
+
+并且将上面返回的信息，赋值到 script.js 的全局变量 gameInfo 里面。
+gameInfo = {
+    roomId: null,
+    thisUserId: null,
+    thatUserId: null,
+    isWhite: true,
+}
+
+# 51 video
 
 
 
