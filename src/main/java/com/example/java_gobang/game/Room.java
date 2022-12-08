@@ -31,7 +31,7 @@ public class Room {
         this.whiteUser = whiteUser;
     }
 
-    // 先手方的玩家 id
+    // 设置先手方的玩家 id (哪个玩家是先手方)
     private int whiteUser;
 
     // 使用常量方式，替代hardcode

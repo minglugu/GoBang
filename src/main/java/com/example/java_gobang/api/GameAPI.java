@@ -114,16 +114,16 @@ public class GameAPI extends TextWebSocketHandler {
 
                 // 当两个玩家都加入成功之后, 就要让服务器, 给这两个玩家都返回 websocket 的响应数据.
                 // 通知这两个玩家说, 游戏双方都已经准备好了.
-                // 通知玩家1, pay attention to the order of parameters of user1(thisUser) and user2(thatUser)
+                // 通知玩家1, pay attention to the order of parameters of user1(是thisUser) and user2(是thatUser)
                 noticeGameReady(room, room.getUser1(), room.getUser2());
-                // 通知玩家2, pay attention to the order of parameters of user2(thisUser) and user1(thatUser)
+                // 通知玩家2, pay attention to the order of parameters of user2(是thisUser) and user1(是thatUser)
                 noticeGameReady(room, room.getUser2(), room.getUser1());
                 return;
             }
         }
 
         // 6. 此处如果又有玩家尝试连接同一个房间, 就提示报错.
-        //    这种情况理论上是不存在的, 为了让程序更加的健壮, 还是做一个判定和提示.
+        //    这种情况理论上是不存在的, 为了让程序更加的健壮 robust, 还是做一个判定和提示.
         resp.setOk(false);
         resp.setReason("当前房间已满, 您不能加入房间");
         session.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
@@ -131,14 +131,17 @@ public class GameAPI extends TextWebSocketHandler {
 
     private void noticeGameReady(Room room, User thisUser, User thatUser) throws IOException {
         GameReadyResponse resp = new GameReadyResponse();
-        resp.setMessage("gameReady"); // based on the agreed value and param
+        // 跟约定好的response的内容相匹配。
+        resp.setMessage("gameReady"); // based on the response value and param(前后端约定的内容)
         resp.setOk(true);
         resp.setReason("");
         resp.setRoomId(room.getRoomId());
         resp.setThisUserId(thisUser.getUserId());
         resp.setThatUserId(thatUser.getUserId());
+        // 先手在第一个玩家加入房间的时候，就设置成先手。
         resp.setWhiteUser(room.getWhiteUser());
-        // 把当前的响应数据传回给玩家(客户端)。
+        // 把当前的响应数据通过websocket传回给玩家(客户端)。通过用户管理器，来找到玩家的session
+        // 这里是针对 thisUser 来进行查询
         WebSocketSession webSocketSession = onlineUserManager.getFromGameRoom(thisUser.getUserId());
         webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
 
