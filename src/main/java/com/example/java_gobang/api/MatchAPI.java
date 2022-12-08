@@ -69,7 +69,7 @@ public class MatchAPI extends TextWebSocketHandler {
                 session.close();
                 return;
             }
-            // 3. 拿到身份信息后，把玩家设置成在线状态了
+            // 3. 拿到身份信息后，把玩家设置成在线状态了。把用户和session这个键值对，加到“在线用户管理器”里面。
             onlineUserManager.enterGameHall(user.getUserId(), session);
             System.out.println("玩家 " + user.getUsername() + " 进入游戏大厅!");
         } catch (NullPointerException e) {

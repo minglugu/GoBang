@@ -22,6 +22,7 @@ import java.io.IOException;
 @Component
 public class GameAPI extends TextWebSocketHandler {
 
+    // 创建objectMapper对象，把对象转换成 JSON 格式的字符串
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -34,26 +35,30 @@ public class GameAPI extends TextWebSocketHandler {
     @Resource
     private UserMapper userMapper;
 
-    // 连接成功之后的处理. video 55 & 56
+    // 连接成功之后，服务器处理的逻辑. video 55 & 56
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        // 准备好GameReadyResponse对象
         GameReadyResponse resp = new GameReadyResponse();
 
-        // 1. 先获取到用户的身份信息，（从Httpsession 里拿到当前用户的对象）.根据user这个key，拿到user这个对象
+        // 1. 先获取到用户的身份信息，（从Httpsession 里拿到当前用户的对象）.根据“user”这个key，拿到user这个对象
+        // 跟游戏大厅 (game_hall) 是同样一个效果
+        // 前面注册的时候，已经加上了拦截器的操作。webSocketHandlerRegistry.addHandler(gameAPI, "/game")...
+        // 就可以拿到Httpsession里面的attribute了 get(Object key)
         User user = (User) session.getAttributes().get("user");
 
         // 先判定异常，再处理正常逻辑
-
-        // 针对用户尚未登录的情况。User跳过登录，可能是null
+        // 针对用户尚未登录的情况。User跳过登录，可能是null,
+        // 所以，此处进行一个判断
         if (user == null) {
             resp.setOk(false);
             resp.setReason("用户尚未登录");
             // 转换成JSON格式的字符串，返回到客户那里
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
-            // session.close();
+            // session.close(); // 也可以通过客户端界面处理
             return;
         }
-        // 2. 判定当前用户是否在此房间里
+        // 2. 判定当前用户是否在此房间里，用 RoomManager 这个房间管理器，进行查询。
         Room room = roomManager.getRoomByUserId(user.getUserId());
         if (room == null) {
             // 如果为null，当前没有找到对应的房间。该玩家还没有匹配到
@@ -69,10 +74,10 @@ public class GameAPI extends TextWebSocketHandler {
         //    对用户进行查找
         if (onlineUserManager.getFromGameHall(user.getUserId()) != null
                 || onlineUserManager.getFromGameRoom(user.getUserId()) != null) {
-            // 如果一个账号，在游戏大厅，也在游戏房间，也算是多开
+            // 如果一个账号，同时在游戏大厅，也在游戏房间，也算是多开
             resp.setOk(true);
             resp.setReason("禁止多开游戏界面");
-            resp.setMessage("repeatConnection");
+            resp.setMessage("multiple connections are not allowed");
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(resp)));
             return;
         }
@@ -82,8 +87,8 @@ public class GameAPI extends TextWebSocketHandler {
 
         // 5. 把两个玩家加入到游戏房间中 （此处两个user，同时执行if的逻辑操作，为多线程操作，需要考虑线程安全问题）
         //    两个玩家都以为自己是先手。
-        //    当前这个逻辑实在 game_room.html 页面加载的时候进行的。
-        //    前面的创建房间/匹配过程, 是在 game_hall.html 页面中完成的.
+        //    当前这个逻辑是在 game_room.html 页面加载的时候进行的。
+        //    前面的创建房间/匹配过程, 是在 game_hall.html 页面中完成的. 涉及到页面跳转
         //    因此前面匹配到对手之后, 需要经过页面跳转, 来到 game_room.html 才算正式进入游戏房间(才算玩家准备就绪)
         //    当前这个逻辑是在 game_room.html 页面加载的时候进行的.
         //    执行到当前逻辑, 说明玩家已经页面跳转成功了!!
@@ -177,7 +182,7 @@ public class GameAPI extends TextWebSocketHandler {
         noticeThatUserWin(user);
     }
 
-    // 连接关闭后的处理
+    // 连接关闭后的处理，网络断开，或者用户关闭页面。
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         User user = (User) session.getAttributes().get("user");
@@ -185,13 +190,14 @@ public class GameAPI extends TextWebSocketHandler {
             // 此处就简单处理，在断开连接的时候，就不给客户端返回响应了。
             return;
         }
-        // 查一下用户的状态
+        // 查一下用户的状态，如果是在线，那么就设置成离线。
         WebSocketSession exitSession = onlineUserManager.getFromGameRoom(user.getUserId());
         // 是同一个会话的情况下，再进行下线操作
         // 加上这个判定，目的是为了避免在多开的情况下, 第二个用户退出连接动作, 导致第一个用户的会话被删除.
         if (exitSession == session) {
             onlineUserManager.exitGameRoom(user.getUserId());
         }
+        // 打印日志
         System.out.println("当前用户 " + user.getUsername() + " 离开游戏房间!");
 
         // 通知对手获胜
@@ -234,8 +240,6 @@ public class GameAPI extends TextWebSocketHandler {
 
         // 6. 释放房间对象.不释放的话，造成roomManager里的room，越来越多，会造成内存泄露的问题
         roomManager.remove(room.getRoomId(), room.getUser1().getUserId(), room.getUser2().getUserId());
-
-
 
     }
 }
