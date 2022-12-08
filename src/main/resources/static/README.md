@@ -358,12 +358,15 @@ gameInfo = {
     isWhite: true,
 }
 
-# 51 video
-
-
-
 --------------------------------------------------------------------------------------------------------------------------------
+# 52
+1. 建立 GameAPI.java,
 
+2. 将 GameAPI 加入到WebSocketConfig.java 里面。下面是具体的代码。
+        webSocketHandlerRegistry.addHandler(gameAPI, "/game")
+                .addInterceptors(new HttpSessionHandshakeInterceptor());
+
+3. 请求和响应对象的准备：为这三个 Java class，是前后脚建立的：GameReadyResponse.java, GameRequest.java, GameResponse.java
 
 
 

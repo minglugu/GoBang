@@ -16,7 +16,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-// 处理game websocket的连接请求，类似match API
+// description: 处理game websocket的连接请求，处理类似match API，继承自 TextWebSocketHandler
+// override 4 个方法
+// 注册 Spring 里面的组件
 @Component
 public class GameAPI extends TextWebSocketHandler {
 

@@ -67,19 +67,25 @@ websocket.onmessage = function(event) {
         return;
     }
 
+    // 消息的类型，不等于gameReady。因为前后端约定好，返回gameReady的message。
+    // 如果返回的不是gameReady，给出一个错误提示。
     if (resp.message != 'gameReady') {
         console.log("响应类型错误");
         return;
     }
 
+    // 返回的响应，是正确的。那么将响应的数据，赋值到 gameInfo 里面
     gameInfo.roomId = resp.roomId;
     gameInfo.thisUserId = resp.thisUserId;
     gameInfo.thatUserId = resp.thatUserId;
     gameInfo.isWhite = (resp.whiteUser == resp.thisUserId);
 
-    // 初始化棋盘放到响应里面，响应成功，就会初始化棋盘
+    // 关键步骤：初始化棋盘放到响应里面，响应成功，就会初始化棋盘。
+    // 如果失败，就不应该初始化棋盘。
     initGame();
-    // 设置显示区域的内容
+    // 设置显示区域的内容，根据function setScreenText(me) 中的me，来确定谁落子。
+    // me 在初始情况下，就是isWhite。如果是先手，那么就提示，轮到你落子。如果是后手，
+    // 那么就提示，轮到对方落子。
     setScreenText(gameInfo.isWhite);
 //     } else if (resp.message == 'repeatConnection') {
 //         alert("检测到游戏多开! 请使用其他账号登录!");

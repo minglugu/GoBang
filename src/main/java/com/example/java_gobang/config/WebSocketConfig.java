@@ -18,7 +18,8 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @EnableWebSocket // 开启 websocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    // 用Spring的方式，注入进来
+    // 用Spring的方式，注入进来。
+    // 处理客户端的请求，与服务器连接
     @Autowired
     private TestAPI testAPI;
 
@@ -38,7 +39,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         webSocketHandlerRegistry.addHandler(testAPI, "/test");
         // ws://127.0.0.1:8080/findMatch，这个是约定好的. addInterceptors，使用拦截器，拿到Httpsession，
         // （放到Websocket的session中）。用户登录就会给HttpSession中，保存用户的信息.
-        // 用户的Httpsession和Websocket的session是不一样的。
+        // 注意：用户的Httpsession 和 Websocket 的 session 是不一样的。
         // 关联的路径，是前面约定好的 “/findMatch” 路径，靠这个路径，来跟服务器建立连接
         // 看到 findMatch 这个路径的 websocket 请求，就会执行 matchAPI 里面的代码
         // 加拦截器的作用，起到的效果是，能够拿到前面的http session
@@ -53,7 +54,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         webSocketHandlerRegistry.addHandler(matchAPI, "/findMatch")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
 
-        // /game路径和这个gameAPI类 关联起来了，再通过add来获取session
+        // “/game路径” 和这个gameAPI类 关联起来了，再通过addInterceptor 这样的拦截器，来获取session
         webSocketHandlerRegistry.addHandler(gameAPI, "/game")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }

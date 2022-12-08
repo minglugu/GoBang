@@ -1,11 +1,12 @@
 package com.example.java_gobang.game;
 
-// 落子请求
+// 这个类表示的是落子的请求request，包含落子的相关信息
 public class GameRequest {
     private String message;
-    private int userId;
-    private int row;
-    private int col;
+    private int userId; // 是谁落的子
+    // 落子位置的坐标
+    private int row;    // 第几行
+    private int col;    // 第几列
 
     public String getMessage() {
         return message;

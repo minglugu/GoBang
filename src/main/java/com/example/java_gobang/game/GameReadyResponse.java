@@ -1,6 +1,6 @@
 package com.example.java_gobang.game;
 
-/* 客户端连接到游戏房间后，服务器返回的响应
+/* 客户端成功连接到游戏房间后，服务器返回的响应
   当玩家匹配成功后，由服务器生成的内容，返回到浏览器中。
  这个是响应的JSON信息。
  {
@@ -12,7 +12,10 @@ package com.example.java_gobang.game;
       thatUserId: 2,            // 玩家的对手的id
       whiteUser: 1              // 哪个玩家是白子（先落子）
  }
- 没有一个对应的request，ws://127.0.0.1：8080/game 这个为request
+ 不需要生成单独的一个类，生成一个请求(request)
+ 因为请求里，也不需要传递信息，
+ 所以连接成功后，给客户端，返回一个响应对象(上面的JSON对象里的信息)就可以了
+ ws://127.0.0.1：8080/game 这个为request
  */
 public class GameReadyResponse {
     private String message;
@@ -20,8 +23,8 @@ public class GameReadyResponse {
     private String reason;
     private String roomId;
     private int thisUserId;
-    private int thatUserId;
-    private int whiteUser;
+    private int thatUserId; // 对手id
+    private int whiteUser;  // 谁是先手(白子)
 
     public String getMessage() {
         return message;

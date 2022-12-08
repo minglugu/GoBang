@@ -1,12 +1,12 @@
 package com.example.java_gobang.game;
 
-// 这个类 表示落子响应
+// 这个类表示的是落子的响应，包含的内容，跟约定的格式是相匹配的
 public class GameResponse {
     private String message;
     private int userId;
     private int row;
     private int col;
-    private int winner;
+    private int winner; // 谁获胜了
 
     public String getMessage() {
         return message;
